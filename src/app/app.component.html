@@ -1,0 +1,37 @@
+<div class="app-shell" [class.sidebar-collapsed]="!sidebarOpen()">
+  @if (mobile() && sidebarOpen()) { <button class="scrim" aria-label="Close navigation" (click)="toggleSidebar()"></button> }
+  <aside class="sidebar" [class.open]="sidebarOpen()">
+    <div class="brand">
+      <div class="brand-mark"><lucide-icon [img]="icons.Sparkles" [size]="19" /></div>
+      <div class="brand-copy"><strong>TitleFlow</strong><span>Operations suite</span></div>
+      <button class="icon-button collapse" (click)="toggleSidebar()"><lucide-icon [img]="icons.ChevronLeft" [size]="18" /></button>
+    </div>
+    <nav>
+      <p class="nav-label">Workspace</p>
+      <a routerLink="/dashboard" routerLinkActive="active"><lucide-icon [img]="icons.LayoutDashboard" [size]="19" /><span>Overview</span></a>
+      <a routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.BookOpen" [size]="19" /><span>Title library</span><em>1,248</em></a>
+      <a routerLink="/titles/upload" routerLinkActive="active"><lucide-icon [img]="icons.FileSpreadsheet" [size]="19" /><span>Import titles</span></a>
+      <p class="nav-label spaced">Insights</p>
+      <a class="muted"><lucide-icon [img]="icons.BarChart3" [size]="19" /><span>Reports</span><i>Soon</i></a>
+      <a class="muted"><lucide-icon [img]="icons.Settings2" [size]="19" /><span>Preferences</span></a>
+    </nav>
+    <div class="sidebar-callout">
+      <span><lucide-icon [img]="icons.Sparkles" [size]="17" /></span>
+      <strong>Import smarter</strong>
+      <p>Preview every row before it reaches your library.</p>
+      <a routerLink="/titles/upload">Start an import →</a>
+    </div>
+    <div class="profile">
+      <div class="avatar">UM</div><div><strong>Uday Mathur</strong><span>Administrator</span></div><button>•••</button>
+    </div>
+  </aside>
+
+  <section class="workspace">
+    <header class="topbar">
+      <button class="icon-button menu" (click)="toggleSidebar()"><lucide-icon [img]="icons.Menu" [size]="21" /></button>
+      <div class="global-search"><lucide-icon [img]="icons.Search" [size]="18" /><input placeholder="Search titles, invoices or code refs..." /><kbd>⌘ K</kbd></div>
+      <div class="top-actions"><button class="icon-button notification"><lucide-icon [img]="icons.Bell" [size]="19" /><span></span></button><a class="primary-action" routerLink="/titles/upload"><lucide-icon [img]="icons.Plus" [size]="18" />New import</a></div>
+    </header>
+    <main><router-outlet /></main>
+  </section>
+</div>
