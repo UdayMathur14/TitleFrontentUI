@@ -29,5 +29,9 @@ export class TitleApiService {
   previewImport(file: File) { const form = new FormData(); form.append('file', file); return this.http.post<ImportPreview>(`${this.base}/import/preview`, form); }
   commitImport(importToken: string) { return this.http.post(`${this.base}/import/commit`, { importToken }); }
   template() { return this.http.get(`${this.base}/template`, { responseType: 'blob' }); }
-  export(filter: TitleFilter) { return this.http.get(`${this.base}/export`, { responseType: 'blob' }); }
+  export(filter: TitleFilter) {
+    let params = new HttpParams();
+    Object.entries(filter).forEach(([key, value]) => { if (value !== undefined && value !== null && value !== '' && !['page', 'pageSize'].includes(key)) params = params.set(key, String(value)); });
+    return this.http.get(`${this.base}/export`, { params, responseType: 'blob' });
+  }
 }

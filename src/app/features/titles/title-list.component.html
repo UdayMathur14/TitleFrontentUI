@@ -1,8 +1,68 @@
-<section class="page-heading"><div><div class="eyebrow">Title operations</div><h1>Title library</h1><p>Explore, filter and manage every title record from one place.</p></div><div class="heading-actions"><button class="button" (click)="export()"><lucide-icon [img]="icons.Download" [size]="16"/>Export</button><a class="button mint" routerLink="/titles/upload"><lucide-icon [img]="icons.Plus" [size]="16"/>Import titles</a></div></section>
+<section class="page-heading">
+  <div>
+    <div class="eyebrow">Title operations</div>
+    <h1>View all titles</h1>
+    <p>Browse and manage every record stored in TBL_TITLES.</p>
+  </div>
+  <div class="heading-actions">
+    <button class="button" (click)="export()"><lucide-icon [img]="icons.Download" [size]="16" />Export</button>
+    <a class="button mint" routerLink="/titles/upload"><lucide-icon [img]="icons.Plus" [size]="16" />Import titles</a>
+  </div>
+</section>
+
 <section class="library-card card">
- <div class="library-toolbar"><div class="result-title"><span><lucide-icon [img]="icons.BookOpen" [size]="18"/></span><div><strong>All title records</strong><small>{{total()}} records in your library</small></div></div><div class="toolbar-actions">@if(selected().size){<span class="selected-count">{{selected().size}} selected</span><button class="button danger" (click)="remove()"><lucide-icon [img]="icons.Trash2" [size]="15"/>Delete</button>}<button class="button" (click)="filterOpen.set(!filterOpen())"><lucide-icon [img]="icons.Filter" [size]="15"/>Filters</button><button class="square" (click)="load()"><lucide-icon [img]="icons.RefreshCw" [size]="16"/></button></div></div>
- @if(filterOpen()){
- <form class="filters" (ngSubmit)="load()"><div class="field title-search"><label>Search title</label><div class="input-icon"><lucide-icon [img]="icons.Search" [size]="15"/><input name="title" [(ngModel)]="filter.title" placeholder="e.g. Patent Leaders"/></div></div><div class="field"><label>Code reference</label><input name="code" [(ngModel)]="filter.codeReference" placeholder="CR-0000"/></div><div class="field"><label>Invoice number</label><input name="invoice" [(ngModel)]="filter.invoiceNumber" placeholder="INV-0000"/></div><div class="field"><label>Financial year</label><input name="year" [(ngModel)]="filter.titleYear" placeholder="2026-27"/></div><div class="field"><label>Status</label><select name="status" [(ngModel)]="filter.status"><option value="">All status</option><option>Clean</option><option>Blocked</option></select></div><div class="filter-buttons"><button type="button" class="square" (click)="clear()" title="Clear"><lucide-icon [img]="icons.X" [size]="16"/></button><button class="button dark"><lucide-icon [img]="icons.Search" [size]="15"/>Apply</button></div></form>}
- <div class="table-wrap"><table><thead><tr><th class="check"><input type="checkbox" [checked]="allSelected()" (change)="toggleAll()"/></th><th>ID</th><th>Title details</th><th>Code reference</th><th>Invoice</th><th>Financial year</th><th>Created by</th><th>Status</th></tr></thead><tbody>@if(loading()){@for(i of [1,2,3,4,5];track i){<tr class="skeleton-row"><td colspan="8"><span></span></td></tr>}}@else{@for(record of records();track record.id){<tr [class.selected]="selected().has(record.id)"><td class="check"><input type="checkbox" [checked]="selected().has(record.id)" (change)="toggle(record.id)"/></td><td><span class="record-id">#{{record.id}}</span></td><td><div class="title-cell"><span>{{record.title.charAt(0)}}</span><div><strong>{{record.title}}</strong><small>Added {{record.createdOn}}</small></div></div></td><td><code>{{record.codeReference}}</code></td><td>{{record.invoiceNumber}}</td><td><span class="year-chip">{{record.titleYear}}</span></td><td><div class="creator"><span>{{record.createdBy.charAt(0)}}</span>{{record.createdBy}}</div></td><td><span class="pill" [class.clean]="record.status==='Clean'" [class.blocked]="record.status==='Blocked'">{{record.status}}</span></td></tr>}@empty{<tr><td colspan="8"><div class="empty"><lucide-icon [img]="icons.Search" [size]="27"/><h3>No matching titles</h3><p>Try clearing or changing your filters.</p></div></td></tr>}}</tbody></table></div>
- <footer class="table-footer"><p>Showing <strong>{{records().length}}</strong> of <strong>{{total()}}</strong> records</p><div><button disabled><lucide-icon [img]="icons.ChevronLeft" [size]="15"/>Previous</button><span class="current">1</span><button disabled>Next<lucide-icon [img]="icons.ChevronRight" [size]="15"/></button></div></footer>
-</section>@if(toast()){<div class="toast">{{toast()}}</div>}
+  <div class="library-toolbar">
+    <div class="result-title">
+      <span><lucide-icon [img]="icons.BookOpen" [size]="18" /></span>
+      <div><strong>All title records</strong><small>{{total()}} records in your library</small></div>
+    </div>
+    <div class="toolbar-actions">
+      @if(selected().size){
+        <span class="selected-count">{{selected().size}} selected</span>
+        <button class="button danger" (click)="remove()"><lucide-icon [img]="icons.Trash2" [size]="15" />Delete</button>
+      }
+      <button class="button" (click)="filterOpen.set(!filterOpen())"><lucide-icon [img]="icons.Filter" [size]="15" />Filters</button>
+      <button class="square" (click)="load()"><lucide-icon [img]="icons.RefreshCw" [size]="16" /></button>
+    </div>
+  </div>
+
+  @if(filterOpen()){
+    <form class="filters" (ngSubmit)="applyFilters()">
+      <div class="field title-search"><label>Search title</label><div class="input-icon"><lucide-icon [img]="icons.Search" [size]="15" /><input name="title" [(ngModel)]="filter.title" placeholder="Search title" /></div></div>
+      <div class="field"><label>Code reference</label><input name="code" [(ngModel)]="filter.codeReference" placeholder="Code reference" /></div>
+      <div class="field"><label>Invoice number</label><input name="invoice" [(ngModel)]="filter.invoiceNumber" placeholder="Invoice number" /></div>
+      <div class="field"><label>Financial year</label><input name="year" [(ngModel)]="filter.titleYear" placeholder="2025-26" /></div>
+      <div class="field"><label>Status</label><select name="status" [(ngModel)]="filter.status"><option value="">All status</option><option>Clean</option><option>Blocked</option></select></div>
+      <div class="filter-buttons"><button type="button" class="square" (click)="clear()"><lucide-icon [img]="icons.X" [size]="16" /></button><button class="button dark"><lucide-icon [img]="icons.Search" [size]="15" />Apply</button></div>
+    </form>
+  }
+
+  @if(error()){<div class="empty"><h3>Unable to load titles</h3><p>{{error()}}</p></div>}
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th class="check"><input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" /></th><th>ID</th><th>Title details</th><th>Code reference</th><th>Invoice</th><th>Financial year</th><th>Created by</th><th>Status</th></tr></thead>
+      <tbody>
+        @if(loading()){
+          @for(i of [1,2,3,4,5];track i){<tr class="skeleton-row"><td colspan="8"><span></span></td></tr>}
+        } @else {
+          @for(record of records();track record.id){
+            <tr [class.selected]="selected().has(record.id)">
+              <td class="check"><input type="checkbox" [checked]="selected().has(record.id)" (change)="toggle(record.id)" /></td>
+              <td><span class="record-id">#{{record.id}}</span></td>
+              <td><div class="title-cell"><span>{{record.title.charAt(0)}}</span><div><strong>{{record.title}}</strong><small>Added {{record.createdOn}}</small></div></div></td>
+              <td><code>{{record.codeReference}}</code></td><td>{{record.invoiceNumber}}</td><td><span class="year-chip">{{record.titleYear}}</span></td>
+              <td><div class="creator"><span>{{record.createdBy.charAt(0)}}</span>{{record.createdBy}}</div></td>
+              <td><span class="pill" [class.clean]="record.status==='Clean'" [class.blocked]="record.status==='Blocked'">{{record.status}}</span></td>
+            </tr>
+          } @empty {<tr><td colspan="8"><div class="empty"><h3>No matching titles</h3><p>No API records match the current filters.</p></div></td></tr>}
+        }
+      </tbody>
+    </table>
+  </div>
+  <footer class="table-footer">
+    <p>Page <strong>{{filter.page}}</strong> of <strong>{{totalPages()}}</strong> · Showing <strong>{{records().length}}</strong> · Total <strong>{{total()}}</strong></p>
+    <div><button [disabled]="filter.page <= 1" (click)="previousPage()"><lucide-icon [img]="icons.ChevronLeft" [size]="15" />Previous</button><span class="current">{{filter.page}}</span><button [disabled]="filter.page >= totalPages()" (click)="nextPage()">Next<lucide-icon [img]="icons.ChevronRight" [size]="15" /></button></div>
+  </footer>
+</section>
+@if(toast()){<div class="toast">{{toast()}}</div>}

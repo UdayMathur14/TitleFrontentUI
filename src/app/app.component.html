@@ -9,11 +9,8 @@
     <nav>
       <p class="nav-label">Workspace</p>
       <a routerLink="/dashboard" routerLinkActive="active"><lucide-icon [img]="icons.LayoutDashboard" [size]="19" /><span>Overview</span></a>
-      <a routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.BookOpen" [size]="19" /><span>Title library</span><em>1,248</em></a>
+      <a routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.BookOpen" [size]="19" /><span>View all titles</span></a>
       <a routerLink="/titles/upload" routerLinkActive="active"><lucide-icon [img]="icons.FileSpreadsheet" [size]="19" /><span>Import titles</span></a>
-      <p class="nav-label spaced">Insights</p>
-      <a class="muted"><lucide-icon [img]="icons.BarChart3" [size]="19" /><span>Reports</span><i>Soon</i></a>
-      <a class="muted"><lucide-icon [img]="icons.Settings2" [size]="19" /><span>Preferences</span></a>
     </nav>
     <div class="profile">
       <div class="avatar">T</div><div><strong>Title Management</strong><span>Workspace</span></div>
@@ -23,8 +20,7 @@
   <section class="workspace">
     <header class="topbar">
       <button class="icon-button menu" (click)="toggleSidebar()"><lucide-icon [img]="icons.Menu" [size]="21" /></button>
-      <div class="global-search"><lucide-icon [img]="icons.Search" [size]="18" /><input placeholder="Search titles, invoices or code refs..." /><kbd>⌘ K</kbd></div>
-      <div class="top-actions"><button class="icon-button notification"><lucide-icon [img]="icons.Bell" [size]="19" /><span></span></button><a class="primary-action" routerLink="/titles/upload"><lucide-icon [img]="icons.Plus" [size]="18" />New import</a></div>
+      <div class="top-actions"><a class="primary-action" routerLink="/titles"><lucide-icon [img]="icons.BookOpen" [size]="18" />View all titles</a><a class="primary-action" routerLink="/titles/upload"><lucide-icon [img]="icons.Plus" [size]="18" />Import</a></div>
     </header>
     <main><router-outlet /></main>
   </section>
