@@ -8,7 +8,7 @@ Premium Angular 22 standalone frontend for title operations.
 - Searchable, filterable and selectable title library
 - Excel import, validation preview and commit workflow
 - Template and filtered export actions
-- API-first services with a polished mock fallback for immediate preview
+- API-only data flow; no hardcoded business records
 
 ## Run
 

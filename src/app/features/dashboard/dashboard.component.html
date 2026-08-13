@@ -1,4 +1,5 @@
-<section class="page-heading"><div><div class="eyebrow">Thursday, 13 August</div><h1>Good afternoon, Uday.</h1><p>Here’s what’s happening across your title library today.</p></div><a class="button mint" routerLink="/titles/upload"><lucide-icon [img]="icons.FileUp" [size]="16"/>Import spreadsheet</a></section>
+<section class="page-heading"><div><div class="eyebrow">Title operations</div><h1>Dashboard</h1><p>Overview of the title records returned by the API.</p></div><a class="button mint" routerLink="/titles/upload"><lucide-icon [img]="icons.FileUp" [size]="16"/>Import spreadsheet</a></section>
+@if(error()){<section class="card empty"><h3>Unable to load dashboard</h3><p>{{error()}}</p></section>}
 @if(data();as dashboard){
 <section class="stats">
   <article class="metric"><span class="metric-icon blue"><lucide-icon [img]="icons.BookOpen" [size]="19"/></span><div><p>Total titles</p><strong>{{dashboard.totalTitles.toLocaleString()}}</strong><small><b>+8.4%</b> vs last month</small></div><span class="spark blue-spark">╱╲╱╲╱</span></article>
