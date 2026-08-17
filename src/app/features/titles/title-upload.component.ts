@@ -18,6 +18,7 @@ import {
 } from 'lucide-angular';
 import { ImportPreview, ImportRow } from '../../core/models/title.models';
 import { TitleApiService } from '../../core/services/title-api.service';
+import { apiErrorMessage } from '../../shared/api-error';
 import { saveBlob } from '../../shared/download';
 
 type ResultView = 'All' | ImportRow['category'];
@@ -70,8 +71,12 @@ export class TitleUploadComponent {
   }
 
   setFile(file: File) {
-    if (!/\.xlsx?$/i.test(file.name)) {
-      this.notify('Please choose an Excel file in .xlsx or .xls format.');
+    if (!/\.xlsx$/i.test(file.name)) {
+      this.notify('Please choose an Excel file in .xlsx format.');
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      this.notify('The Excel file cannot be larger than 50 MB.');
       return;
     }
     this.error.set('');
@@ -107,7 +112,7 @@ export class TitleUploadComponent {
       error: error => {
         this.loading.set(false);
         this.preview.set(null);
-        this.error.set(error?.error?.detail || error?.error?.title || 'Validation failed. Please make sure the API and SalesDataDB are available.');
+        this.error.set(apiErrorMessage(error, 'Spreadsheet validation failed.'));
       }
     });
   }
@@ -119,14 +124,14 @@ export class TitleUploadComponent {
     this.loading.set(true);
     this.error.set('');
     this.api.commitImport(value.importToken).subscribe({
-      next: () => {
+      next: result => {
         this.loading.set(false);
         this.saved.set(true);
-        this.notify(`${value.cleanCount} clean titles saved successfully.`);
+        this.notify(`${result.savedCount} clean titles saved successfully.`);
       },
       error: error => {
         this.loading.set(false);
-        this.error.set(error?.error?.detail || error?.error?.title || 'Upload and save failed. Please check the API.');
+        this.error.set(apiErrorMessage(error, 'Upload and save failed.'));
       }
     });
   }
@@ -134,7 +139,7 @@ export class TitleUploadComponent {
   downloadTemplate() {
     this.api.template().subscribe({
       next: blob => saveBlob(blob, 'UploadTitles.xlsx'),
-      error: () => this.notify('Connect the API to download the template.')
+      error: error => this.notify(apiErrorMessage(error, 'Template could not be downloaded.'))
     });
   }
 

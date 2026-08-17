@@ -1,13 +1,25 @@
-<section class="page-heading"><div><div class="eyebrow">Title operations</div><h1>Dashboard</h1><p>Overview of the title records returned by the API.</p></div><a class="button mint" routerLink="/titles/upload"><lucide-icon [img]="icons.FileUp" [size]="16"/>Import spreadsheet</a></section>
+<section class="page-heading"><div><div class="eyebrow">Title operations</div><h1>Dashboard</h1><p>Live overview of the title records returned by the API.</p></div><a class="button mint" routerLink="/titles/upload"><lucide-icon [img]="icons.FileUp" [size]="16"/>Import spreadsheet</a></section>
+
 @if(error()){<section class="card empty"><h3>Unable to load dashboard</h3><p>{{error()}}</p></section>}
+
 @if(data();as dashboard){
-<section class="stats">
-  <article class="metric"><span class="metric-icon blue"><lucide-icon [img]="icons.BookOpen" [size]="19"/></span><div><p>Total titles</p><strong>{{dashboard.totalTitles.toLocaleString()}}</strong><small><b>+8.4%</b> vs last month</small></div><span class="spark blue-spark">╱╲╱╲╱</span></article>
-  <article class="metric"><span class="metric-icon mint"><lucide-icon [img]="icons.FileCheck2" [size]="19"/></span><div><p>Clean records</p><strong>{{dashboard.cleanTitles.toLocaleString()}}</strong><small><b>94.1%</b> of library</small></div><span class="spark mint-spark">╱╲╱╲╱</span></article>
-  <article class="metric"><span class="metric-icon amber"><lucide-icon [img]="icons.CircleAlert" [size]="19"/></span><div><p>Blocked records</p><strong>{{dashboard.blockedTitles}}</strong><small><b class="warn">5.9%</b> need review</small></div><span class="spark amber-spark">╱╲╱╲╱</span></article>
-  <article class="metric"><span class="metric-icon violet"><lucide-icon [img]="icons.TrendingUp" [size]="19"/></span><div><p>Added this month</p><strong>{{dashboard.uploadedThisMonth}}</strong><small><b>+12</b> this week</small></div><span class="spark violet-spark">╱╲╱╲╱</span></article>
-</section>
-<section class="dashboard-grid">
-  <article class="card recent"><div class="card-title"><div><h2>Recently added</h2><p>The latest records in your title library</p></div><a routerLink="/titles">View all <lucide-icon [img]="icons.ArrowRight" [size]="14"/></a></div><div class="recent-list">@for(item of dashboard.recentTitles;track item.id){<div class="recent-row"><div class="doc-icon">{{item.title.charAt(0)}}</div><div class="recent-name"><strong>{{item.title}}</strong><span>{{item.codeReference}} · {{item.invoiceNumber}}</span></div><span class="year">{{item.titleYear}}</span><span class="pill" [class.clean]="item.status==='Clean'" [class.blocked]="item.status==='Blocked'">{{item.status}}</span><time>{{item.createdOn}}</time></div>}</div></article>
-  <aside class="activity-card"><div class="orb"><lucide-icon [img]="icons.Sparkles" [size]="24"/></div><p class="eyebrow">Library health</p><h2>Your records look excellent.</h2><p>94.1% of all titles are clean and ready to use. Review 74 blocked records to improve your library.</p><div class="health"><span><i style="width:94.1%"></i></span><strong>94.1%</strong></div><a class="button" routerLink="/titles">Review library <lucide-icon [img]="icons.ArrowRight" [size]="14"/></a></aside>
-</section>}
+  <section class="stats">
+    <article class="metric"><span class="metric-icon blue"><lucide-icon [img]="icons.BookOpen" [size]="19"/></span><div><p>Total titles</p><strong>{{dashboard.totalTitles.toLocaleString()}}</strong><small>Current records in the library</small></div></article>
+    <article class="metric"><span class="metric-icon mint"><lucide-icon [img]="icons.FileCheck2" [size]="19"/></span><div><p>Clean records</p><strong>{{dashboard.cleanTitles.toLocaleString()}}</strong><small><b>{{cleanPercentage()}}%</b> of the library</small></div></article>
+    <article class="metric"><span class="metric-icon amber"><lucide-icon [img]="icons.CircleAlert" [size]="19"/></span><div><p>Blocked records</p><strong>{{dashboard.blockedTitles.toLocaleString()}}</strong><small><b class="warn">{{blockedPercentage()}}%</b> of the library</small></div></article>
+    <article class="metric"><span class="metric-icon violet"><lucide-icon [img]="icons.TrendingUp" [size]="19"/></span><div><p>Added this month</p><strong>{{dashboard.uploadedThisMonth.toLocaleString()}}</strong><small>Created during the current month</small></div></article>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="card recent">
+      <div class="card-title"><div><h2>Recently added</h2><p>The latest records returned by the API</p></div><a routerLink="/titles">View all <lucide-icon [img]="icons.ArrowRight" [size]="14"/></a></div>
+      <div class="recent-list">
+        @for(item of dashboard.recentTitles;track item.id){
+          <div class="recent-row"><div class="doc-icon">{{item.title.charAt(0)}}</div><div class="recent-name"><strong>{{item.title}}</strong><span>{{item.codeReference}} · {{item.invoiceNumber}}</span></div><span class="year">{{item.titleYear}}</span><span class="pill" [class.clean]="item.status==='Clean'" [class.blocked]="item.status==='Blocked'">{{item.status}}</span><time>{{item.createdOn || ''}}</time></div>
+        } @empty {<div class="empty"><h3>No recent titles</h3><p>The API did not return any recent records.</p></div>}
+      </div>
+    </article>
+
+    <aside class="activity-card"><div class="orb"><lucide-icon [img]="icons.Sparkles" [size]="24"/></div><p class="eyebrow">Library health</p><h2>{{dashboard.blockedTitles ? 'Library health at a glance.' : 'All records are clean.'}}</h2><p>{{cleanPercentage()}}% of all titles are clean. {{dashboard.blockedTitles}} blocked {{dashboard.blockedTitles === 1 ? 'record needs' : 'records need'}} review.</p><div class="health"><span><i [style.width.%]="cleanPercentage()"></i></span><strong>{{cleanPercentage()}}%</strong></div><a class="button" routerLink="/titles">Review library <lucide-icon [img]="icons.ArrowRight" [size]="14"/></a></aside>
+  </section>
+}

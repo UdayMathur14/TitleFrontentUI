@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Download,
   Filter,
   Hash,
   LucideAngularModule,
@@ -20,8 +21,10 @@ import {
   TriangleAlert,
   X
 } from 'lucide-angular';
-import { CreateTitleRequest, TitleFilter, TitleRecord } from '../../core/models/title.models';
+import { CreateTitleRequest, DropdownData, TitleFilter, TitleRecord } from '../../core/models/title.models';
 import { TitleApiService } from '../../core/services/title-api.service';
+import { apiErrorMessage } from '../../shared/api-error';
+import { saveBlob } from '../../shared/download';
 
 type EditableTitle = Pick<CreateTitleRequest, 'codeReference' | 'invoiceNumber' | 'title' | 'titleYear'>;
 
@@ -36,7 +39,7 @@ export class TitleListComponent implements OnInit {
   private readonly api = inject(TitleApiService);
 
   readonly icons = {
-    ArrowLeft, BookOpen, CalendarDays, ChevronDown, ChevronLeft, ChevronRight,
+    ArrowLeft, BookOpen, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Download,
     Filter, Hash, Pencil, RefreshCw, Save, Search, SlidersHorizontal,
     Trash2, TriangleAlert, X
   };
@@ -45,14 +48,17 @@ export class TitleListComponent implements OnInit {
   readonly records = signal<TitleRecord[]>([]);
   readonly total = signal(0);
   readonly totalPages = signal(0);
+  readonly dropdowns = signal<DropdownData>({ codeReferences: [], invoiceNumbers: [], titles: [], years: [] });
   readonly selected = signal(new Set<number>());
   readonly filterOpen = signal(true);
   readonly toast = signal('');
   readonly error = signal('');
+  readonly exporting = signal(false);
   readonly editing = signal<TitleRecord | null>(null);
   readonly editError = signal('');
   readonly saving = signal(false);
   readonly deleteIds = signal<number[]>([]);
+  readonly bulkDelete = signal(false);
   readonly deleting = signal(false);
 
   filter: TitleFilter = {
@@ -71,7 +77,17 @@ export class TitleListComponent implements OnInit {
     this.records().length > 0 && this.records().every(record => this.selected().has(record.id))
   );
 
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    this.load();
+    this.loadDropdowns();
+  }
+
+  loadDropdowns() {
+    this.api.getDropdowns(undefined, 1000).subscribe({
+      next: value => this.dropdowns.set(value),
+      error: () => this.dropdowns.set({ codeReferences: [], invoiceNumbers: [], titles: [], years: [] })
+    });
+  }
 
   load() {
     this.loading.set(true);
@@ -84,12 +100,12 @@ export class TitleListComponent implements OnInit {
         this.totalPages.set(result.totalPages);
         this.loading.set(false);
       },
-      error: () => {
+      error: error => {
         this.records.set([]);
         this.total.set(0);
         this.totalPages.set(0);
         this.loading.set(false);
-        this.error.set('Title records could not be loaded. Please make sure the API is running and connected to SalesDataDB.');
+        this.error.set(apiErrorMessage(error, 'Title records could not be loaded.'));
       }
     });
   }
@@ -112,6 +128,22 @@ export class TitleListComponent implements OnInit {
 
   toggleAll() {
     this.selected.set(this.allSelected() ? new Set() : new Set(this.records().map(record => record.id)));
+  }
+
+  exportTitles() {
+    if (this.exporting()) return;
+    this.exporting.set(true);
+    this.api.export(this.filter).subscribe({
+      next: blob => {
+        this.exporting.set(false);
+        saveBlob(blob, `TitleRecords-${new Date().toISOString().slice(0, 10)}.xlsx`);
+        this.notify('Title export downloaded successfully');
+      },
+      error: error => {
+        this.exporting.set(false);
+        this.notify(apiErrorMessage(error, 'Title export could not be downloaded.'));
+      }
+    });
   }
 
   openEdit(record: TitleRecord) {
@@ -148,7 +180,8 @@ export class TitleListComponent implements OnInit {
     }
 
     const yearMatch = /^(\d{4})-(\d{2})$/.exec(value.titleYear);
-    const validConsecutiveYear = yearMatch && Number(yearMatch[2]) === (Number(yearMatch[1]) + 1) % 100;
+    const startYear = yearMatch ? Number(yearMatch[1]) : 0;
+    const validConsecutiveYear = yearMatch && startYear >= 1999 && startYear <= 2099 && Number(yearMatch[2]) === (startYear + 1) % 100;
     if (!validConsecutiveYear) {
       this.editError.set('Financial year must be consecutive and use YYYY-YY format, for example 2025-26.');
       return;
@@ -163,16 +196,19 @@ export class TitleListComponent implements OnInit {
         this.editing.set(null);
         this.notify('Title updated successfully');
       },
-      error: () => {
+      error: error => {
         this.saving.set(false);
-        this.editError.set('Title could not be updated. Please check the API and try again.');
+        this.editError.set(apiErrorMessage(error, 'Title could not be updated. Please try again.'));
       }
     });
   }
 
   askDelete(record?: TitleRecord) {
     const ids = record ? [record.id] : [...this.selected()];
-    if (ids.length) this.deleteIds.set(ids);
+    if (ids.length) {
+      this.bulkDelete.set(!record);
+      this.deleteIds.set(ids);
+    }
   }
 
   cancelDelete() {
@@ -184,18 +220,19 @@ export class TitleListComponent implements OnInit {
     if (!ids.length || this.deleting()) return;
 
     this.deleting.set(true);
-    this.api.deleteMany(ids).subscribe({
-      next: () => {
+    const request = this.bulkDelete() ? this.api.deleteMany(ids) : this.api.deleteOne(ids[0]);
+    request.subscribe({
+      next: result => {
         this.deleting.set(false);
         this.deleteIds.set([]);
         this.selected.set(new Set());
-        this.notify(ids.length === 1 ? 'Title deleted successfully' : `${ids.length} titles deleted successfully`);
+        this.notify(result.deletedCount === 1 ? 'Title deleted successfully' : `${result.deletedCount} titles deleted successfully`);
         this.load();
       },
-      error: () => {
+      error: error => {
         this.deleting.set(false);
         this.deleteIds.set([]);
-        this.notify('Delete failed. Please check the API and try again.');
+        this.notify(apiErrorMessage(error, 'Delete failed. Please try again.'));
       }
     });
   }
