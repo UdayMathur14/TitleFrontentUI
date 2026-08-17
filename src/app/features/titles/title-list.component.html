@@ -1,68 +1,79 @@
-<section class="page-heading">
-  <div>
-    <div class="eyebrow">Title operations</div>
-    <h1>View all titles</h1>
-    <p>Browse and manage every record stored in TBL_TITLES.</p>
+<section class="title-hero">
+  <div class="hero-copy">
+    <span class="hero-icon"><lucide-icon [img]="icons.BookOpen" [size]="25" /></span>
+    <div><div class="eyebrow">Title management</div><h1>View <span>Titles</span></h1><p>Search, filter and manage your complete title library from one place.</p></div>
   </div>
-  <div class="heading-actions">
-    <button class="button" (click)="export()"><lucide-icon [img]="icons.Download" [size]="16" />Export</button>
-    <a class="button mint" routerLink="/titles/upload"><lucide-icon [img]="icons.Plus" [size]="16" />Import titles</a>
-  </div>
+  <a class="back-action" routerLink="/dashboard"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to overview</a>
 </section>
 
 <section class="library-card card">
-  <div class="library-toolbar">
-    <div class="result-title">
-      <span><lucide-icon [img]="icons.BookOpen" [size]="18" /></span>
-      <div><strong>All title records</strong><small>{{total()}} records in your library</small></div>
-    </div>
+  <header class="library-toolbar">
+    <div class="result-title"><span><lucide-icon [img]="icons.BookOpen" [size]="18" /></span><div><strong>Title records</strong><small>@if(loading()){Fetching your library…}@else if(total()){ {{total()}} records found }@else{ Your results will appear below }</small></div></div>
     <div class="toolbar-actions">
-      @if(selected().size){
-        <span class="selected-count">{{selected().size}} selected</span>
-        <button class="button danger" (click)="remove()"><lucide-icon [img]="icons.Trash2" [size]="15" />Delete</button>
-      }
-      <button class="button" (click)="filterOpen.set(!filterOpen())"><lucide-icon [img]="icons.Filter" [size]="15" />Filters</button>
-      <button class="square" (click)="load()"><lucide-icon [img]="icons.RefreshCw" [size]="16" /></button>
+      @if(selected().size){<span class="selected-count">{{selected().size}} selected</span><button class="button danger" (click)="askDelete()"><lucide-icon [img]="icons.Trash2" [size]="15" />Delete selected</button>}
+      <button class="button filter-toggle" [class.active]="filterOpen()" (click)="filterOpen.set(!filterOpen())"><lucide-icon [img]="icons.SlidersHorizontal" [size]="15" />Filters<lucide-icon class="chevron" [class.up]="filterOpen()" [img]="icons.ChevronDown" [size]="14" /></button>
+      <button class="square" aria-label="Refresh records" title="Refresh records" (click)="load()"><lucide-icon [img]="icons.RefreshCw" [size]="16" /></button>
     </div>
-  </div>
+  </header>
 
   @if(filterOpen()){
     <form class="filters" (ngSubmit)="applyFilters()">
-      <div class="field title-search"><label>Search title</label><div class="input-icon"><lucide-icon [img]="icons.Search" [size]="15" /><input name="title" [(ngModel)]="filter.title" placeholder="Search title" /></div></div>
-      <div class="field"><label>Code reference</label><input name="code" [(ngModel)]="filter.codeReference" placeholder="Code reference" /></div>
-      <div class="field"><label>Invoice number</label><input name="invoice" [(ngModel)]="filter.invoiceNumber" placeholder="Invoice number" /></div>
-      <div class="field"><label>Financial year</label><input name="year" [(ngModel)]="filter.titleYear" placeholder="2025-26" /></div>
-      <div class="field"><label>Status</label><select name="status" [(ngModel)]="filter.status"><option value="">All status</option><option>Clean</option><option>Blocked</option></select></div>
-      <div class="filter-buttons"><button type="button" class="square" (click)="clear()"><lucide-icon [img]="icons.X" [size]="16" /></button><button class="button dark"><lucide-icon [img]="icons.Search" [size]="15" />Apply</button></div>
+      <div class="filter-heading"><span><lucide-icon [img]="icons.Filter" [size]="15" /></span><div><strong>Find a title</strong><small>Use one or more fields to narrow the results</small></div></div>
+      <div class="filter-grid">
+        <div class="field title-search"><label>Title</label><div class="input-icon"><lucide-icon [img]="icons.Search" [size]="15" /><input name="title" [(ngModel)]="filter.title" placeholder="Search by title name" /></div></div>
+        <div class="field"><label>Code reference</label><input name="code" [(ngModel)]="filter.codeReference" placeholder="Enter code reference" /></div>
+        <div class="field"><label>Invoice number</label><input name="invoice" [(ngModel)]="filter.invoiceNumber" placeholder="Enter invoice number" /></div>
+        <div class="field"><label>Record ID</label><div class="input-icon"><lucide-icon [img]="icons.Hash" [size]="15" /><input type="number" min="1" name="id" [(ngModel)]="filter.id" placeholder="Enter ID" /></div></div>
+        <div class="field"><label>Financial year</label><div class="input-icon"><lucide-icon [img]="icons.CalendarDays" [size]="15" /><input name="year" [(ngModel)]="filter.titleYear" placeholder="e.g. 2025-26" /></div></div>
+      </div>
+      <div class="filter-buttons"><button type="button" class="button clear" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear all</button><button class="button dark"><lucide-icon [img]="icons.Search" [size]="15" />Search titles</button></div>
     </form>
   }
 
-  @if(error()){<div class="empty"><h3>Unable to load titles</h3><p>{{error()}}</p></div>}
+  <div class="table-wrap"><table>
+    <thead><tr><th class="check"><input aria-label="Select all records" type="checkbox" [checked]="allSelected()" (change)="toggleAll()" /></th><th>ID</th><th class="title-column">Title</th><th>Code reference</th><th>Invoice no.</th><th>Created by</th><th>Financial year</th><th>Date</th><th>Status</th><th class="actions-column">Actions</th></tr></thead>
+    <tbody>
+      @if(loading()){@for(i of [1,2,3,4,5];track i){<tr class="skeleton-row"><td colspan="10"><span></span></td></tr>}}
+      @else {@for(record of records();track record.id){
+        <tr [class.selected]="selected().has(record.id)">
+          <td class="check"><input [attr.aria-label]="'Select title '+record.id" type="checkbox" [checked]="selected().has(record.id)" (change)="toggle(record.id)" /></td>
+          <td><span class="record-id">#{{record.id}}</span></td>
+          <td><div class="title-cell"><span><lucide-icon [img]="icons.BookOpen" [size]="16" /></span><div><strong>{{record.title}}</strong><small>Title record</small></div></div></td>
+          <td><code>{{record.codeReference}}</code></td><td>{{record.invoiceNumber}}</td><td><div class="creator"><span>{{record.createdBy.charAt(0)}}</span>{{record.createdBy}}</div></td><td><span class="year-chip">{{record.titleYear}}</span></td><td>{{record.createdOn}}</td><td><span class="pill" [class.clean]="record.status==='Clean'" [class.blocked]="record.status==='Blocked'">{{record.status}}</span></td>
+          <td><div class="row-actions"><button aria-label="Edit title" title="Edit title" (click)="openEdit(record)"><lucide-icon [img]="icons.Pencil" [size]="14" /></button><button class="delete" aria-label="Delete title" title="Delete title" (click)="askDelete(record)"><lucide-icon [img]="icons.Trash2" [size]="14" /></button></div></td>
+        </tr>
+      } @empty {<tr><td colspan="10"><div class="empty-state"><span><lucide-icon [img]="error() ? icons.RefreshCw : icons.BookOpen" [size]="25" /></span><h3>{{error() ? 'Could not load titles' : 'No titles found'}}</h3><p>{{error() || 'No records match your current filters. Try adjusting or clearing them.'}}</p>@if(error()){<button class="button" (click)="load()"><lucide-icon [img]="icons.RefreshCw" [size]="15" />Try again</button>}@else{<button class="button" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear filters</button>}</div></td></tr>}}
+    </tbody>
+  </table></div>
 
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th class="check"><input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" /></th><th>ID</th><th>Title details</th><th>Code reference</th><th>Invoice</th><th>Financial year</th><th>Created by</th><th>Status</th></tr></thead>
-      <tbody>
-        @if(loading()){
-          @for(i of [1,2,3,4,5];track i){<tr class="skeleton-row"><td colspan="8"><span></span></td></tr>}
-        } @else {
-          @for(record of records();track record.id){
-            <tr [class.selected]="selected().has(record.id)">
-              <td class="check"><input type="checkbox" [checked]="selected().has(record.id)" (change)="toggle(record.id)" /></td>
-              <td><span class="record-id">#{{record.id}}</span></td>
-              <td><div class="title-cell"><span>{{record.title.charAt(0)}}</span><div><strong>{{record.title}}</strong><small>Added {{record.createdOn}}</small></div></div></td>
-              <td><code>{{record.codeReference}}</code></td><td>{{record.invoiceNumber}}</td><td><span class="year-chip">{{record.titleYear}}</span></td>
-              <td><div class="creator"><span>{{record.createdBy.charAt(0)}}</span>{{record.createdBy}}</div></td>
-              <td><span class="pill" [class.clean]="record.status==='Clean'" [class.blocked]="record.status==='Blocked'">{{record.status}}</span></td>
-            </tr>
-          } @empty {<tr><td colspan="8"><div class="empty"><h3>No matching titles</h3><p>No API records match the current filters.</p></div></td></tr>}
-        }
-      </tbody>
-    </table>
-  </div>
-  <footer class="table-footer">
-    <p>Page <strong>{{filter.page}}</strong> of <strong>{{totalPages()}}</strong> · Showing <strong>{{records().length}}</strong> · Total <strong>{{total()}}</strong></p>
-    <div><button [disabled]="filter.page <= 1" (click)="previousPage()"><lucide-icon [img]="icons.ChevronLeft" [size]="15" />Previous</button><span class="current">{{filter.page}}</span><button [disabled]="filter.page >= totalPages()" (click)="nextPage()">Next<lucide-icon [img]="icons.ChevronRight" [size]="15" /></button></div>
-  </footer>
+  @if(!loading() && total() > 0){<footer class="table-footer"><p>Showing <strong>{{records().length}}</strong> of <strong>{{total()}}</strong> titles</p><div><button [disabled]="filter.page <= 1" (click)="previousPage()"><lucide-icon [img]="icons.ChevronLeft" [size]="15" />Previous</button><span>Page <strong>{{filter.page}}</strong> of {{totalPages()}}</span><button [disabled]="filter.page >= totalPages()" (click)="nextPage()">Next<lucide-icon [img]="icons.ChevronRight" [size]="15" /></button></div></footer>}
 </section>
+
+@if(editing(); as record){
+  <div class="modal-backdrop" (click)="closeEdit()">
+    <section class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-title-heading" (click)="$event.stopPropagation()">
+      <header><div><span><lucide-icon [img]="icons.Pencil" [size]="17" /></span><div><h2 id="edit-title-heading">Edit title</h2><p>Update record #{{record.id}}</p></div></div><button aria-label="Close edit dialog" (click)="closeEdit()"><lucide-icon [img]="icons.X" [size]="18" /></button></header>
+      <form class="edit-form" (ngSubmit)="saveEdit()" novalidate>
+        <div class="field full"><label for="edit-title">Title <b>*</b></label><textarea id="edit-title" name="editTitle" required maxlength="1000" [(ngModel)]="editForm.title" (input)="editError.set('')" placeholder="Enter title"></textarea></div>
+        <div class="edit-grid">
+          <div class="field"><label for="edit-code">Code reference <b>*</b></label><input id="edit-code" name="editCode" required maxlength="100" [(ngModel)]="editForm.codeReference" (input)="editError.set('')" placeholder="Enter code reference" /></div>
+          <div class="field"><label for="edit-invoice">Invoice number <b>*</b></label><input id="edit-invoice" name="editInvoice" required maxlength="100" [(ngModel)]="editForm.invoiceNumber" (input)="editError.set('')" placeholder="Enter invoice number" /></div>
+          <div class="field"><label for="edit-year">Financial year <b>*</b></label><div class="input-icon"><lucide-icon [img]="icons.CalendarDays" [size]="15" /><input id="edit-year" name="editYear" required maxlength="7" pattern="[0-9]{4}-[0-9]{2}" [(ngModel)]="editForm.titleYear" (input)="editError.set('')" placeholder="e.g. 2025-26" /></div><small>Required format: YYYY-YY, with consecutive years.</small></div>
+        </div>
+        @if(editError()){<p class="form-error">{{editError()}}</p>}
+        <footer><button type="button" class="button" [disabled]="saving()" (click)="closeEdit()">Cancel</button><button class="button mint" [disabled]="saving()"><lucide-icon [img]="icons.Save" [size]="15" />{{saving() ? 'Saving…' : 'Save changes'}}</button></footer>
+      </form>
+    </section>
+  </div>
+}
+
+@if(deleteIds().length){
+  <div class="modal-backdrop" (click)="cancelDelete()">
+    <section class="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-title-heading" (click)="$event.stopPropagation()">
+      <span><lucide-icon [img]="icons.TriangleAlert" [size]="23" /></span><h2 id="delete-title-heading">Delete {{deleteIds().length === 1 ? 'title' : deleteIds().length + ' titles'}}?</h2><p>This action cannot be undone. The selected {{deleteIds().length === 1 ? 'record' : 'records'}} will be permanently removed.</p>
+      <footer><button class="button" [disabled]="deleting()" (click)="cancelDelete()">Cancel</button><button class="button danger-solid" [disabled]="deleting()" (click)="confirmDelete()"><lucide-icon [img]="icons.Trash2" [size]="15" />{{deleting() ? 'Deleting…' : 'Delete'}}</button></footer>
+    </section>
+  </div>
+}
+
 @if(toast()){<div class="toast">{{toast()}}</div>}

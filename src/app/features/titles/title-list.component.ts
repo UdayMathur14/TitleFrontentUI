@@ -1,26 +1,207 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { BookOpen, ChevronLeft, ChevronRight, Download, Filter, LucideAngularModule, Plus, RefreshCw, Search, Trash2, X } from 'lucide-angular';
-import { TitleFilter, TitleRecord } from '../../core/models/title.models';
+import {
+  ArrowLeft,
+  BookOpen,
+  CalendarDays,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Hash,
+  LucideAngularModule,
+  Pencil,
+  RefreshCw,
+  Save,
+  Search,
+  SlidersHorizontal,
+  Trash2,
+  TriangleAlert,
+  X
+} from 'lucide-angular';
+import { CreateTitleRequest, TitleFilter, TitleRecord } from '../../core/models/title.models';
 import { TitleApiService } from '../../core/services/title-api.service';
-import { saveBlob } from '../../shared/download';
 
-@Component({selector:'app-title-list',standalone:true,imports:[FormsModule,RouterLink,LucideAngularModule],templateUrl:'./title-list.component.html',styleUrl:'./title-list.component.scss'})
-export class TitleListComponent implements OnInit{
- private readonly api=inject(TitleApiService); readonly icons={BookOpen,ChevronLeft,ChevronRight,Download,Filter,Plus,RefreshCw,Search,Trash2,X};
- readonly loading=signal(true);readonly records=signal<TitleRecord[]>([]);readonly total=signal(0);readonly totalPages=signal(0);readonly selected=signal(new Set<number>());readonly filterOpen=signal(true);readonly toast=signal('');readonly error=signal('');
- filter:TitleFilter={page:1,pageSize:100,title:'',codeReference:'',invoiceNumber:'',titleYear:'',status:''};
- readonly allSelected=computed(()=>this.records().length>0&&this.records().every(x=>this.selected().has(x.id)));
- ngOnInit(){this.load();}
- load(){this.loading.set(true);this.error.set('');this.selected.set(new Set());this.api.search(this.filter).subscribe({next:result=>{this.records.set(result.items);this.total.set(result.totalCount);this.totalPages.set(result.totalPages);this.loading.set(false);},error:()=>{this.records.set([]);this.total.set(0);this.totalPages.set(0);this.loading.set(false);this.error.set('Title records could not be loaded. Please make sure the API is running and connected to SalesDataDB.');}});}
- applyFilters(){this.filter.page=1;this.load();}
- clear(){this.filter={page:1,pageSize:100,title:'',codeReference:'',invoiceNumber:'',titleYear:'',status:''};this.load();}
- previousPage(){if(this.filter.page>1){this.filter.page--;this.load();}}
- nextPage(){if(this.filter.page<this.totalPages()){this.filter.page++;this.load();}}
- toggle(id:number){const next=new Set(this.selected());next.has(id)?next.delete(id):next.add(id);this.selected.set(next);}
- toggleAll(){this.selected.set(this.allSelected()?new Set():new Set(this.records().map(x=>x.id)));}
- remove(){if(!this.selected().size)return;this.api.deleteMany([...this.selected()]).subscribe({next:()=>{this.selected.set(new Set());this.notify('Selected titles deleted');this.load();},error:()=>this.notify('Delete failed. Please check the API.')});}
- export(){this.api.export(this.filter).subscribe({next:blob=>saveBlob(blob,`title-records-${new Date().toISOString().slice(0,10)}.xlsx`),error:()=>this.notify('Connect the API to export records')});}
- notify(message:string){this.toast.set(message);setTimeout(()=>this.toast.set(''),2600);}
+type EditableTitle = Pick<CreateTitleRequest, 'codeReference' | 'invoiceNumber' | 'title' | 'titleYear'>;
+
+@Component({
+  selector: 'app-title-list',
+  standalone: true,
+  imports: [FormsModule, RouterLink, LucideAngularModule],
+  templateUrl: './title-list.component.html',
+  styleUrl: './title-list.component.scss'
+})
+export class TitleListComponent implements OnInit {
+  private readonly api = inject(TitleApiService);
+
+  readonly icons = {
+    ArrowLeft, BookOpen, CalendarDays, ChevronDown, ChevronLeft, ChevronRight,
+    Filter, Hash, Pencil, RefreshCw, Save, Search, SlidersHorizontal,
+    Trash2, TriangleAlert, X
+  };
+
+  readonly loading = signal(true);
+  readonly records = signal<TitleRecord[]>([]);
+  readonly total = signal(0);
+  readonly totalPages = signal(0);
+  readonly selected = signal(new Set<number>());
+  readonly filterOpen = signal(true);
+  readonly toast = signal('');
+  readonly error = signal('');
+  readonly editing = signal<TitleRecord | null>(null);
+  readonly editError = signal('');
+  readonly saving = signal(false);
+  readonly deleteIds = signal<number[]>([]);
+  readonly deleting = signal(false);
+
+  filter: TitleFilter = {
+    page: 1,
+    pageSize: 100,
+    id: null,
+    title: '',
+    codeReference: '',
+    invoiceNumber: '',
+    titleYear: ''
+  };
+
+  editForm: EditableTitle = { codeReference: '', invoiceNumber: '', title: '', titleYear: '' };
+
+  readonly allSelected = computed(() =>
+    this.records().length > 0 && this.records().every(record => this.selected().has(record.id))
+  );
+
+  ngOnInit() { this.load(); }
+
+  load() {
+    this.loading.set(true);
+    this.error.set('');
+    this.selected.set(new Set());
+    this.api.search(this.filter).subscribe({
+      next: result => {
+        this.records.set(result.items);
+        this.total.set(result.totalCount);
+        this.totalPages.set(result.totalPages);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.records.set([]);
+        this.total.set(0);
+        this.totalPages.set(0);
+        this.loading.set(false);
+        this.error.set('Title records could not be loaded. Please make sure the API is running and connected to SalesDataDB.');
+      }
+    });
+  }
+
+  applyFilters() { this.filter.page = 1; this.load(); }
+
+  clear() {
+    this.filter = { page: 1, pageSize: 100, id: null, title: '', codeReference: '', invoiceNumber: '', titleYear: '' };
+    this.load();
+  }
+
+  previousPage() { if (this.filter.page > 1) { this.filter.page--; this.load(); } }
+  nextPage() { if (this.filter.page < this.totalPages()) { this.filter.page++; this.load(); } }
+
+  toggle(id: number) {
+    const next = new Set(this.selected());
+    next.has(id) ? next.delete(id) : next.add(id);
+    this.selected.set(next);
+  }
+
+  toggleAll() {
+    this.selected.set(this.allSelected() ? new Set() : new Set(this.records().map(record => record.id)));
+  }
+
+  openEdit(record: TitleRecord) {
+    this.editing.set(record);
+    this.editError.set('');
+    this.editForm = {
+      codeReference: record.codeReference,
+      invoiceNumber: record.invoiceNumber,
+      title: record.title,
+      titleYear: record.titleYear
+    };
+  }
+
+  closeEdit() {
+    if (this.saving()) return;
+    this.editing.set(null);
+    this.editError.set('');
+  }
+
+  saveEdit() {
+    const record = this.editing();
+    if (!record || this.saving()) return;
+
+    const value: EditableTitle = {
+      codeReference: this.editForm.codeReference.trim(),
+      invoiceNumber: this.editForm.invoiceNumber.trim(),
+      title: this.editForm.title.trim(),
+      titleYear: this.editForm.titleYear.trim()
+    };
+
+    if (!value.codeReference || !value.invoiceNumber || !value.title || !value.titleYear) {
+      this.editError.set('All four fields are required. Empty values cannot be saved.');
+      return;
+    }
+
+    const yearMatch = /^(\d{4})-(\d{2})$/.exec(value.titleYear);
+    const validConsecutiveYear = yearMatch && Number(yearMatch[2]) === (Number(yearMatch[1]) + 1) % 100;
+    if (!validConsecutiveYear) {
+      this.editError.set('Financial year must be consecutive and use YYYY-YY format, for example 2025-26.');
+      return;
+    }
+
+    this.saving.set(true);
+    this.editError.set('');
+    this.api.update(record.id, { ...value, createdBy: record.createdBy }).subscribe({
+      next: updated => {
+        this.records.update(records => records.map(item => item.id === record.id ? { ...item, ...updated } : item));
+        this.saving.set(false);
+        this.editing.set(null);
+        this.notify('Title updated successfully');
+      },
+      error: () => {
+        this.saving.set(false);
+        this.editError.set('Title could not be updated. Please check the API and try again.');
+      }
+    });
+  }
+
+  askDelete(record?: TitleRecord) {
+    const ids = record ? [record.id] : [...this.selected()];
+    if (ids.length) this.deleteIds.set(ids);
+  }
+
+  cancelDelete() {
+    if (!this.deleting()) this.deleteIds.set([]);
+  }
+
+  confirmDelete() {
+    const ids = this.deleteIds();
+    if (!ids.length || this.deleting()) return;
+
+    this.deleting.set(true);
+    this.api.deleteMany(ids).subscribe({
+      next: () => {
+        this.deleting.set(false);
+        this.deleteIds.set([]);
+        this.selected.set(new Set());
+        this.notify(ids.length === 1 ? 'Title deleted successfully' : `${ids.length} titles deleted successfully`);
+        this.load();
+      },
+      error: () => {
+        this.deleting.set(false);
+        this.deleteIds.set([]);
+        this.notify('Delete failed. Please check the API and try again.');
+      }
+    });
+  }
+
+  notify(message: string) {
+    this.toast.set(message);
+    setTimeout(() => this.toast.set(''), 2600);
+  }
 }

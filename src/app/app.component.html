@@ -1,10 +1,10 @@
 <div class="app-shell" [class.sidebar-collapsed]="!sidebarOpen()">
   @if (mobile() && sidebarOpen()) { <button class="scrim" aria-label="Close navigation" (click)="toggleSidebar()"></button> }
-  <aside class="sidebar" [class.open]="sidebarOpen()">
+  <aside id="app-sidebar" class="sidebar" [class.open]="sidebarOpen()">
     <div class="brand">
       <div class="brand-mark"><lucide-icon [img]="icons.Sparkles" [size]="19" /></div>
       <div class="brand-copy"><strong>TitleFlow</strong><span>Operations suite</span></div>
-      <button class="icon-button collapse" (click)="toggleSidebar()"><lucide-icon [img]="icons.ChevronLeft" [size]="18" /></button>
+      <button class="icon-button collapse" aria-label="Hide sidebar" (click)="toggleSidebar()"><lucide-icon [img]="icons.ChevronLeft" [size]="18" /></button>
     </div>
     <nav>
       <p class="nav-label">Workspace</p>
@@ -19,7 +19,7 @@
 
   <section class="workspace">
     <header class="topbar">
-      <button class="icon-button menu" (click)="toggleSidebar()"><lucide-icon [img]="icons.Menu" [size]="21" /></button>
+      <button class="icon-button menu" aria-label="Show sidebar" aria-controls="app-sidebar" [attr.aria-expanded]="sidebarOpen()" (click)="toggleSidebar()"><lucide-icon [img]="icons.Menu" [size]="21" /></button>
       <div class="top-actions"><a class="primary-action" routerLink="/titles"><lucide-icon [img]="icons.BookOpen" [size]="18" />View all titles</a><a class="primary-action" routerLink="/titles/upload"><lucide-icon [img]="icons.Plus" [size]="18" />Import</a></div>
     </header>
     <main><router-outlet /></main>
