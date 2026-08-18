@@ -43,7 +43,7 @@
         <tr [class.selected]="selected().has(record.id)">
           <td class="check"><input [attr.aria-label]="'Select title '+record.id" type="checkbox" [checked]="selected().has(record.id)" (change)="toggle(record.id)" /></td>
           <td><span class="record-id">#{{record.id}}</span></td>
-          <td><div class="title-cell"><span><lucide-icon [img]="icons.BookOpen" [size]="16" /></span><div><strong>{{record.title}}</strong><small>Title record</small></div></div></td>
+          <td><div class="title-cell"><span><lucide-icon [img]="icons.BookOpen" [size]="16" /></span><div><strong>{{record.title}}</strong><small></small></div></div></td>
           <td><code>{{record.codeReference}}</code></td><td>{{record.invoiceNumber}}</td><td><div class="creator"><span>{{record.createdBy.charAt(0)}}</span>{{record.createdBy}}</div></td><td><span class="year-chip">{{record.titleYear}}</span></td><td>{{record.createdOn}}</td><td><span class="pill" [class.clean]="record.status==='Clean'" [class.blocked]="record.status==='Blocked'">{{record.status}}</span></td>
           <td><div class="row-actions"><button aria-label="Edit title" title="Edit title" (click)="openEdit(record)"><lucide-icon [img]="icons.Pencil" [size]="14" /></button><button class="delete" aria-label="Delete title" title="Delete title" (click)="askDelete(record)"><lucide-icon [img]="icons.Trash2" [size]="14" /></button></div></td>
         </tr>
