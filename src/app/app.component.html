@@ -11,6 +11,10 @@
       <a routerLink="/dashboard" routerLinkActive="active"><lucide-icon [img]="icons.LayoutDashboard" [size]="19" /><span>Overview</span></a>
       <a routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.BookOpen" [size]="19" /><span>View All Titles</span></a>
       <a routerLink="/titles/upload" routerLinkActive="active"><lucide-icon [img]="icons.FileSpreadsheet" [size]="19" /><span>Import Titles</span></a>
+      <p class="nav-label spaced">Publication Titles</p>
+      <a routerLink="/publications" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.FileSpreadsheet" [size]="19" /><span>Title Validation</span></a>
+      <a routerLink="/publications/records" routerLinkActive="active"><lucide-icon [img]="icons.BookCopy" [size]="19" /><span>View Publication Titles</span></a>
+      <a routerLink="/publications/modified" routerLinkActive="active"><lucide-icon [img]="icons.FilePenLine" [size]="19" /><span>Modified Titles</span></a>
     </nav>
     <div class="profile">
       <div class="avatar">T</div><div><strong>Title Management</strong><span>Workspace</span></div>

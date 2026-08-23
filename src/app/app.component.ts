@@ -1,6 +1,6 @@
 import { Component, HostListener, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { BarChart3, Bell, BookOpen, ChevronLeft, FileSpreadsheet, LayoutDashboard, LucideAngularModule, Menu, Plus, Search, Settings2, Sparkles } from 'lucide-angular';
+import { BarChart3, Bell, BookCopy, BookOpen, ChevronLeft, FilePenLine, FileSpreadsheet, LayoutDashboard, LucideAngularModule, Menu, Plus, Search, Settings2, Sparkles } from 'lucide-angular';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +10,7 @@ import { BarChart3, Bell, BookOpen, ChevronLeft, FileSpreadsheet, LayoutDashboar
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  readonly icons = { BarChart3, Bell, BookOpen, ChevronLeft, FileSpreadsheet, LayoutDashboard, Menu, Plus, Search, Settings2, Sparkles };
+  readonly icons = { BarChart3, Bell, BookCopy, BookOpen, ChevronLeft, FilePenLine, FileSpreadsheet, LayoutDashboard, Menu, Plus, Search, Settings2, Sparkles };
   readonly sidebarOpen = signal(true);
   readonly mobile = signal(window.innerWidth < 960);
   constructor() { if (this.mobile()) this.sidebarOpen.set(false); }

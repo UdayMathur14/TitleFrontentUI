@@ -1,0 +1,85 @@
+<section class="publication-hero">
+  <div class="hero-copy">
+    <span class="hero-icon"><lucide-icon [img]="icons.FilePenLine" [size]="25" /></span>
+    <div>
+      <div class="eyebrow">Publication workspace</div>
+      <h1>Modified Publication <span>Titles</span></h1>
+      <p>Upload updated publication titles and review the saved modifications.</p>
+    </div>
+  </div>
+  <a class="back-action" routerLink="/publications"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to validation</a>
+</section>
+
+<section class="action-card card">
+  <div class="action-copy">
+    <span><lucide-icon [img]="icons.FilePenLine" [size]="20" /></span>
+    <div><h2>Modified title spreadsheet</h2><p>Upload the completed .xlsx template to save publication title changes.</p></div>
+  </div>
+  <div class="action-buttons">
+    <input #modifiedInput type="file" accept=".xlsx" hidden (change)="choose($event)" />
+    <button class="button template-button" [disabled]="uploading() || downloading()" (click)="downloadTemplate()"><lucide-icon [img]="icons.Download" [size]="16" />{{downloading() ? 'Downloading…' : 'Download Template'}}</button>
+    <button class="button upload-button" [disabled]="uploading()" (click)="openPicker(modifiedInput)"><lucide-icon [img]="icons.Upload" [size]="16" />{{uploading() ? 'Uploading…' : 'Upload & Save'}}</button>
+  </div>
+  @if(uploading()){<div class="progress-line"><span></span></div>}
+</section>
+
+<section class="records-card card">
+  <header class="records-toolbar">
+    <div class="result-title">
+      <span><lucide-icon [img]="icons.FilePenLine" [size]="18" /></span>
+      <div><strong>Modified publication records</strong><small>@if(loading()){Fetching modifications…}@else if(total()){ {{total()}} records found }@else{ Your results will appear below }</small></div>
+    </div>
+    <button class="square" aria-label="Refresh modified publication titles" title="Refresh records" (click)="load()"><lucide-icon [img]="icons.RefreshCw" [size]="16" /></button>
+  </header>
+
+  <form class="filters" (ngSubmit)="applyFilters()">
+    <div class="filter-copy"><strong>Find a modified title</strong><small>Filter by Paper ID or record ID</small></div>
+    <div class="field">
+      <label>Paper ID</label>
+      <div class="input-icon"><lucide-icon [img]="icons.Search" [size]="15" /><input name="paperId" list="modified-paper-options" [(ngModel)]="filter.paperId" placeholder="Search paper ID" /></div>
+    </div>
+    <div class="field">
+      <label>ID</label>
+      <div class="input-icon"><lucide-icon [img]="icons.Hash" [size]="15" /><input type="number" min="1" name="id" [(ngModel)]="filter.id" placeholder="Enter record ID" /></div>
+    </div>
+    <datalist id="modified-paper-options">@for(option of paperIds(); track option){<option [value]="option"></option>}</datalist>
+    <div class="filter-buttons"><button type="button" class="button clear" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear</button><button class="button dark"><lucide-icon [img]="icons.Search" [size]="15" />Search</button></div>
+  </form>
+
+  @if(error()){
+    <div class="error-banner"><lucide-icon [img]="icons.CircleAlert" [size]="18" /><div><strong>Records could not be loaded</strong><span>{{error()}}</span></div></div>
+  }
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Paper ID</th><th class="title-column">Title</th><th class="updated-column">Updated Title</th><th>Created By</th><th>Date</th></tr></thead>
+      <tbody>
+        @if(loading()){
+          @for(i of [1,2,3,4,5]; track i){<tr class="skeleton-row"><td colspan="6"><span></span></td></tr>}
+        } @else {
+          @for(record of records(); track record.id){
+            <tr>
+              <td><span class="record-id">#{{record.id}}</span></td>
+              <td><span class="paper-id">{{record.paperId}}</span></td>
+              <td class="title-cell">{{record.title}}</td>
+              <td class="updated-cell">{{record.updatedTitle}}</td>
+              <td><div class="creator"><span>{{record.createdBy ? record.createdBy.charAt(0) : '—'}}</span>{{record.createdBy || '—'}}</div></td>
+              <td>{{record.createdOn ? (record.createdOn | date:'dd-MM-yyyy') : '—'}}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6"><div class="empty-state"><span><lucide-icon [img]="error() ? icons.RefreshCw : icons.FilePenLine" [size]="25" /></span><h3>{{error() ? 'Could not load modified titles' : 'No modified titles found'}}</h3><p>{{error() || 'No modified publication records match the current filters.'}}</p>@if(error()){<button class="button" (click)="load()"><lucide-icon [img]="icons.RefreshCw" [size]="15" />Try again</button>}@else{<button class="button" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear filters</button>}</div></td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if(!loading() && total() > 0){
+    <footer class="table-footer">
+      <p>Showing <strong>{{records().length}}</strong> of <strong>{{total()}}</strong> modified titles</p>
+      <div><button [disabled]="filter.page <= 1" (click)="previousPage()"><lucide-icon [img]="icons.ChevronLeft" [size]="15" />Previous</button><span>Page <strong>{{filter.page}}</strong> of {{totalPages()}}</span><button [disabled]="filter.page >= totalPages()" (click)="nextPage()">Next<lucide-icon [img]="icons.ChevronRight" [size]="15" /></button></div>
+    </footer>
+  }
+</section>
+
+@if(toast()){<div class="toast">{{toast()}}</div>}

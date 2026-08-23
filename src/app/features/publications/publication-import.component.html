@@ -1,0 +1,105 @@
+<section class="publication-hero">
+  <div class="hero-copy">
+    <span class="hero-icon"><lucide-icon [img]="icons.CloudUpload" [size]="25" /></span>
+    <div>
+      <div class="eyebrow">Publication workspace</div>
+      <h1>Publication Title <span>Validation</span></h1>
+      <p>Test the publication spreadsheet, review every result, then save clean rows.</p>
+    </div>
+  </div>
+  <a class="back-action" routerLink="/dashboard"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to overview</a>
+</section>
+
+<section class="upload-card card">
+  <header class="upload-heading">
+    <div>
+      <span><lucide-icon [img]="icons.FileSpreadsheet" [size]="19" /></span>
+      <div><h2>Upload publication spreadsheet</h2><p>Use the publication template so every required column is mapped correctly.</p></div>
+    </div>
+    <button class="button template-button" [disabled]="loading()" (click)="downloadTemplate()"><lucide-icon [img]="icons.Download" [size]="16" />Download Template</button>
+  </header>
+
+  <div class="upload-body">
+    <input #fileInput type="file" accept=".xlsx" (change)="choose($event)" hidden />
+    <div class="drop-zone" [class.dragging]="drag()" [class.has-file]="file()" (click)="openPicker(fileInput)" (dragover)="$event.preventDefault(); drag.set(true)" (dragleave)="drag.set(false)" (drop)="drop($event)">
+      @if(file(); as selectedFile){
+        <span class="file-icon"><lucide-icon [img]="icons.FileCheck2" [size]="25" /></span>
+        <div class="selected-file"><strong>{{selectedFile.name}}</strong><small>{{formatFileSize(selectedFile.size)}} · Ready for test upload</small></div>
+        <button class="remove-file" aria-label="Remove selected file" title="Remove file" (click)="removeFile($event)"><lucide-icon [img]="icons.Trash2" [size]="16" /></button>
+      } @else {
+        <span class="upload-icon"><lucide-icon [img]="icons.CloudUpload" [size]="27" /></span>
+        <div><strong>Drop your Excel file here</strong><p>or <button type="button" (click)="$event.stopPropagation(); openPicker(fileInput)">browse from your device</button></p><small>Accepted format: .xlsx · Maximum file size: 50 MB</small></div>
+      }
+    </div>
+
+    <div class="upload-actions">
+      <div class="process-note"><lucide-icon [img]="icons.Info" [size]="15" /><p><strong>Validate before saving</strong><span>Test Upload checks clean, blocked, duplicate and invalid publication rows without saving data.</span></p></div>
+      <div class="action-buttons">
+        <button class="button test-button" [disabled]="!file() || loading()" (click)="testUpload()"><lucide-icon [img]="icons.ScanSearch" [size]="16" />Test Upload</button>
+        <button class="button save-button" [disabled]="!preview() || !preview()?.cleanCount || loading() || saved()" (click)="commit()"><lucide-icon [img]="saved() ? icons.CheckCircle2 : icons.Save" [size]="16" />{{saved() ? 'Saved' : 'Upload & Save'}}</button>
+      </div>
+    </div>
+  </div>
+
+  @if(loading()){
+    <div class="processing"><span class="spinner"></span><div><strong>{{preview() ? 'Saving clean publication titles' : 'Testing publication rows'}}</strong><small>Please wait while the spreadsheet is processed.</small></div></div>
+  }
+</section>
+
+@if(error()){
+  <div class="error-banner"><lucide-icon [img]="icons.CircleAlert" [size]="18" /><div><strong>Publication import could not be completed</strong><span>{{error()}}</span></div></div>
+}
+
+@if(preview(); as result){
+  <section class="summary-grid">
+    <article><span class="metric-icon total"><lucide-icon [img]="icons.FileSpreadsheet" [size]="18" /></span><div><small>Total rows</small><strong>{{result.totalRows}}</strong></div></article>
+    <article><span class="metric-icon clean"><lucide-icon [img]="icons.CheckCircle2" [size]="18" /></span><div><small>Clean</small><strong>{{result.cleanCount}}</strong></div></article>
+    <article><span class="metric-icon blocked"><lucide-icon [img]="icons.ShieldAlert" [size]="18" /></span><div><small>Blocked</small><strong>{{result.blockedCount}}</strong></div></article>
+    <article><span class="metric-icon duplicate"><lucide-icon [img]="icons.FileCheck2" [size]="18" /></span><div><small>Duplicate</small><strong>{{result.duplicateCount}}</strong></div></article>
+    @if(result.invalidCount){<article><span class="metric-icon invalid"><lucide-icon [img]="icons.XCircle" [size]="18" /></span><div><small>Invalid</small><strong>{{result.invalidCount}}</strong></div></article>}
+  </section>
+
+  <section class="result-card card">
+    <header class="result-heading">
+      <div><span><lucide-icon [img]="icons.FileCheck2" [size]="18" /></span><div><h2>Publication validation result</h2><p>{{result.fileName}} · {{result.totalRows}} rows checked</p></div></div>
+      <div class="result-tabs" role="group" aria-label="Filter publication validation results">
+        <button [class.active]="resultView()==='All'" (click)="resultView.set('All')">All <b>{{result.totalRows}}</b></button>
+        <button [class.active]="resultView()==='Clean'" (click)="resultView.set('Clean')">Clean <b>{{result.cleanCount}}</b></button>
+        <button [class.active]="resultView()==='Blocked'" (click)="resultView.set('Blocked')">Blocked <b>{{result.blockedCount}}</b></button>
+        <button [class.active]="resultView()==='Duplicate'" (click)="resultView.set('Duplicate')">Duplicate <b>{{result.duplicateCount}}</b></button>
+        @if(result.invalidCount){<button [class.active]="resultView()==='Invalid'" (click)="resultView.set('Invalid')">Invalid <b>{{result.invalidCount}}</b></button>}
+      </div>
+    </header>
+
+    <div class="result-help"><lucide-icon [img]="icons.Info" [size]="14" /><span>Blocked reference details appear only when a row is blocked. They stay blank for clean rows.</span></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Row No</th><th>Paper ID</th><th>Lot Number</th><th>CodeRef</th><th class="title-column">Title</th><th>FinancialYear</th><th>Blocked DB ID</th><th>Blocked Paper ID</th><th>Blocked Lot No</th><th>Blocked CodeRef</th><th class="blocked-title-column">Blocked Existing Title</th><th class="modified-column">Modified Title</th><th>Status</th></tr></thead>
+        <tbody>
+          @for(row of visibleRows(); track $index){
+            <tr [class.clean-row]="row.category==='Clean'" [class.blocked-row]="row.category==='Blocked'" [class.duplicate-row]="row.category==='Duplicate'" [class.invalid-row]="row.category==='Invalid'">
+              <td><span class="row-number">{{row.rowNumber}}</span></td>
+              <td><span class="paper-id">{{row.paperId || ''}}</span></td>
+              <td>{{row.invoiceNumber || ''}}</td>
+              <td><code>{{row.codeReference || ''}}</code></td>
+              <td class="title-cell">{{row.title || ''}}</td>
+              <td><span class="year">{{row.titleYear || ''}}</span></td>
+              <td class="block-detail">{{row.blockedId ?? ''}}</td>
+              <td class="block-detail">{{row.blockedByPaperId || ''}}</td>
+              <td class="block-detail">{{row.blockedByInvoiceNo || ''}}</td>
+              <td class="block-detail">{{row.blockedCodeRef || ''}}</td>
+              <td class="block-title">{{row.blockedByTitle || ''}}</td>
+              <td class="modified-title">{{row.updatedTitle || ''}}</td>
+              <td><span class="status" [class.clean]="row.category==='Clean'" [class.blocked]="row.category==='Blocked'" [class.duplicate]="row.category==='Duplicate'" [class.invalid]="row.category==='Invalid'">{{row.status || row.category}}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="13"><div class="empty-result"><lucide-icon [img]="icons.FileCheck2" [size]="22" /><strong>No {{resultView().toLowerCase()}} rows</strong><span>This validation result does not contain rows in the selected category.</span></div></td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}
+
+@if(toast()){<div class="toast">{{toast()}}</div>}
