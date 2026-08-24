@@ -158,6 +158,14 @@ export class PublicationImportComponent {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
+  lotNumber(row: PublicationImportRow) {
+    return row.lotNumber || row.lotNo || row.invoiceNumber || '';
+  }
+
+  blockedLotNumber(row: PublicationImportRow) {
+    return row.blockedByLotNo || row.blockedByInvoiceNo || '';
+  }
+
   notify(message: string) {
     this.toast.set(message);
     setTimeout(() => this.toast.set(''), 2800);

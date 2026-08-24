@@ -66,7 +66,7 @@
       </div>
 
       <datalist id="publication-code-options">@for(option of dropdowns().codeReferences; track option){<option [value]="option"></option>}</datalist>
-      <datalist id="publication-lot-options">@for(option of dropdowns().invoiceNumbers; track option){<option [value]="option"></option>}</datalist>
+      <datalist id="publication-lot-options">@for(option of lotOptions(); track option){<option [value]="option"></option>}</datalist>
       <datalist id="publication-title-options">@for(option of dropdowns().titles; track option){<option [value]="option"></option>}</datalist>
       <datalist id="publication-paper-options">@for(option of dropdowns().paperIds; track option){<option [value]="option"></option>}</datalist>
       <datalist id="publication-year-options">@for(option of dropdowns().years; track option){<option [value]="option"></option>}</datalist>
@@ -104,7 +104,7 @@
               <td class="check"><input [attr.aria-label]="'Select publication '+record.id" type="checkbox" [checked]="selected().has(record.id)" (change)="toggle(record.id)" /></td>
               <td><span class="record-id">#{{record.id}}</span></td>
               <td><code>{{record.codeReference}}</code></td>
-              <td>{{record.invoiceNumber}}</td>
+              <td><span class="lot-number">{{lotNumber(record)}}</span></td>
               <td><span class="paper-id">{{record.paperId}}</span></td>
               <td class="title-cell"><strong>{{record.title}}</strong></td>
               <td class="modified-cell">{{record.updatedTitle || '—'}}</td>

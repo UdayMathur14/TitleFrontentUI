@@ -65,6 +65,11 @@ export class PublicationApiService {
     for (const [key, value] of Object.entries(filter)) {
       if (value === undefined || value === null || value === '') continue;
       params = params.set(key, String(value));
+      // Publication APIs may expose the renamed field as LotNumber/LotNo while
+      // the original title contract still calls the same value InvoiceNumber.
+      if (key === 'invoiceNumber') {
+        params = params.set('lotNumber', String(value)).set('lotNo', String(value));
+      }
     }
     return params;
   }

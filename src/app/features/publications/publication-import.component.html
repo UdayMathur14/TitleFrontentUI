@@ -81,13 +81,13 @@
             <tr [class.clean-row]="row.category==='Clean'" [class.blocked-row]="row.category==='Blocked'" [class.duplicate-row]="row.category==='Duplicate'" [class.invalid-row]="row.category==='Invalid'">
               <td><span class="row-number">{{row.rowNumber}}</span></td>
               <td><span class="paper-id">{{row.paperId || ''}}</span></td>
-              <td>{{row.invoiceNumber || ''}}</td>
+              <td>{{lotNumber(row)}}</td>
               <td><code>{{row.codeReference || ''}}</code></td>
               <td class="title-cell">{{row.title || ''}}</td>
               <td><span class="year">{{row.titleYear || ''}}</span></td>
               <td class="block-detail">{{row.blockedId ?? ''}}</td>
               <td class="block-detail">{{row.blockedByPaperId || ''}}</td>
-              <td class="block-detail">{{row.blockedByInvoiceNo || ''}}</td>
+              <td class="block-detail">{{blockedLotNumber(row)}}</td>
               <td class="block-detail">{{row.blockedCodeRef || ''}}</td>
               <td class="block-title">{{row.blockedByTitle || ''}}</td>
               <td class="modified-title">{{row.updatedTitle || ''}}</td>

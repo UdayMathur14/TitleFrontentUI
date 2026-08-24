@@ -57,6 +57,9 @@ export class PublicationListComponent implements OnInit {
   readonly allSelected = computed(() =>
     this.records().length > 0 && this.records().every(record => this.selected().has(record.id))
   );
+  readonly lotOptions = computed(() =>
+    this.dropdowns().lotNumbers ?? this.dropdowns().lotNos ?? this.dropdowns().invoiceNumbers ?? []
+  );
 
   ngOnInit() {
     this.load();
@@ -158,6 +161,10 @@ export class PublicationListComponent implements OnInit {
   notify(message: string) {
     this.toast.set(message);
     setTimeout(() => this.toast.set(''), 2800);
+  }
+
+  lotNumber(record: PublicationRecord) {
+    return record.lotNumber || record.lotNo || record.invoiceNumber || '—';
   }
 
   private emptyFilter(): PublicationFilter {

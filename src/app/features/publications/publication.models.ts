@@ -4,7 +4,9 @@ export interface PublicationRecord {
   id: number;
   rowNumber: number;
   codeReference: string;
-  invoiceNumber: string;
+  invoiceNumber?: string;
+  lotNumber?: string;
+  lotNo?: string;
   paperId: string;
   title: string;
   updatedTitle: string;
@@ -34,7 +36,9 @@ export interface ModifiedPublicationFilter {
 
 export interface PublicationDropdownData {
   codeReferences: string[];
-  invoiceNumbers: string[];
+  invoiceNumbers?: string[];
+  lotNumbers?: string[];
+  lotNos?: string[];
   paperIds: string[];
   titles: string[];
   years: string[];
@@ -43,13 +47,16 @@ export interface PublicationDropdownData {
 export interface PublicationImportRow {
   rowNumber: number;
   paperId: string;
-  invoiceNumber: string;
+  invoiceNumber?: string;
+  lotNumber?: string;
+  lotNo?: string;
   codeReference: string;
   title: string;
   titleYear: string;
   blockedId?: number | null;
   blockedByPaperId?: string | null;
   blockedByInvoiceNo?: string | null;
+  blockedByLotNo?: string | null;
   blockedCodeRef?: string | null;
   blockedByTitle?: string | null;
   updatedTitle: string;
