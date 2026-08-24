@@ -52,7 +52,6 @@ export class TitleListComponent implements OnInit {
   readonly selected = signal(new Set<number>());
   readonly filterOpen = signal(true);
   readonly toast = signal('');
-  readonly error = signal('');
   readonly exporting = signal(false);
   readonly editing = signal<TitleRecord | null>(null);
   readonly editError = signal('');
@@ -91,7 +90,6 @@ export class TitleListComponent implements OnInit {
 
   load() {
     this.loading.set(true);
-    this.error.set('');
     this.selected.set(new Set());
     this.api.search(this.filter).subscribe({
       next: result => {
@@ -105,7 +103,6 @@ export class TitleListComponent implements OnInit {
         this.total.set(0);
         this.totalPages.set(0);
         this.loading.set(false);
-        this.error.set(apiErrorMessage(error, 'Title records could not be loaded.'));
       }
     });
   }

@@ -3,7 +3,6 @@ import { RouterLink } from '@angular/router';
 import { ArrowRight, BookOpen, CircleAlert, FileCheck2, FileUp, LucideAngularModule, Sparkles, TrendingUp } from 'lucide-angular';
 import { TitleDashboard } from '../../core/models/title.models';
 import { TitleApiService } from '../../core/services/title-api.service';
-import { apiErrorMessage } from '../../shared/api-error';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,7 +15,6 @@ export class DashboardComponent implements OnInit {
   private readonly api = inject(TitleApiService);
 
   readonly data = signal<TitleDashboard | null>(null);
-  readonly error = signal('');
   readonly icons = { ArrowRight, BookOpen, CircleAlert, FileCheck2, FileUp, Sparkles, TrendingUp };
 
   readonly cleanPercentage = computed(() => this.percentage(this.data()?.cleanTitles ?? 0));
@@ -24,9 +22,19 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.api.getDashboard().subscribe({
-      next: value => this.data.set(value),
-      error: error => this.error.set(apiErrorMessage(error, 'Dashboard data could not be loaded.'))
+      next: value => this.data.set({
+        totalTitles: value?.totalTitles ?? 0,
+        cleanTitles: value?.cleanTitles ?? 0,
+        blockedTitles: value?.blockedTitles ?? 0,
+        uploadedThisMonth: value?.uploadedThisMonth ?? 0,
+        recentTitles: value?.recentTitles ?? []
+      }),
+      error: () => this.data.set(this.emptyDashboard())
     });
+  }
+
+  private emptyDashboard(): TitleDashboard {
+    return { totalTitles: 0, cleanTitles: 0, blockedTitles: 0, uploadedThisMonth: 0, recentTitles: [] };
   }
 
   private percentage(count: number) {

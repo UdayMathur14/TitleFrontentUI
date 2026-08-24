@@ -43,7 +43,6 @@ export class PublicationModifiedComponent implements OnInit {
   readonly total = signal(0);
   readonly totalPages = signal(0);
   readonly paperIds = signal<string[]>([]);
-  readonly error = signal('');
   readonly toast = signal('');
 
   filter: ModifiedPublicationFilter = this.emptyFilter();
@@ -58,7 +57,6 @@ export class PublicationModifiedComponent implements OnInit {
 
   load() {
     this.loading.set(true);
-    this.error.set('');
     this.api.searchModified(this.filter).subscribe({
       next: result => {
         this.records.set(result.items);
@@ -71,7 +69,6 @@ export class PublicationModifiedComponent implements OnInit {
         this.total.set(0);
         this.totalPages.set(0);
         this.loading.set(false);
-        this.error.set(apiErrorMessage(error, 'Modified publication titles could not be loaded.'));
       }
     });
   }

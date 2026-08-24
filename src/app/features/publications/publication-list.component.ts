@@ -47,7 +47,6 @@ export class PublicationListComponent implements OnInit {
   });
   readonly selected = signal(new Set<number>());
   readonly filterOpen = signal(true);
-  readonly error = signal('');
   readonly toast = signal('');
   readonly deleteIds = signal<number[]>([]);
   readonly deleting = signal(false);
@@ -68,7 +67,6 @@ export class PublicationListComponent implements OnInit {
 
   load() {
     this.loading.set(true);
-    this.error.set('');
     this.selected.set(new Set());
     this.api.search(this.filter).subscribe({
       next: result => {
@@ -82,7 +80,6 @@ export class PublicationListComponent implements OnInit {
         this.total.set(0);
         this.totalPages.set(0);
         this.loading.set(false);
-        this.error.set(apiErrorMessage(error, 'Publication title records could not be loaded.'));
       }
     });
   }

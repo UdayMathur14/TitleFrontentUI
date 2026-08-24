@@ -115,11 +115,10 @@
             </tr>
           } @empty {
             <tr><td colspan="11"><div class="empty-state">
-              <span><lucide-icon [img]="error() ? icons.RefreshCw : icons.BookCopy" [size]="25" /></span>
-              <h3>{{error() ? 'Could not load publication titles' : 'No publication titles found'}}</h3>
-              <p>{{error() || 'No records match your current filters. Try adjusting or clearing them.'}}</p>
-              @if(error()){<button class="button" (click)="load()"><lucide-icon [img]="icons.RefreshCw" [size]="15" />Try again</button>}
-              @else{<button class="button" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear filters</button>}
+              <span><lucide-icon [img]="icons.BookCopy" [size]="25" /></span>
+              <h3>No records found</h3>
+              <p>No publication title records match your current filters.</p>
+              <button class="button" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear filters</button>
             </div></td></tr>
           }
         }

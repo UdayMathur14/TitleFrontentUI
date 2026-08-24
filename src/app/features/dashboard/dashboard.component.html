@@ -1,7 +1,5 @@
 <section class="page-heading"><div><div class="eyebrow">Title operations</div><h1>Dashboard</h1><p>Live overview of the title records returned by the API.</p></div><a class="button mint" routerLink="/titles/upload"><lucide-icon [img]="icons.FileUp" [size]="16"/>Import spreadsheet</a></section>
 
-@if(error()){<section class="card empty"><h3>Unable to load dashboard</h3><p>{{error()}}</p></section>}
-
 @if(data();as dashboard){
   <section class="stats">
     <article class="metric"><span class="metric-icon blue"><lucide-icon [img]="icons.BookOpen" [size]="19"/></span><div><p>Total titles</p><strong>{{dashboard.totalTitles.toLocaleString()}}</strong><small>Current records in the library</small></div></article>
