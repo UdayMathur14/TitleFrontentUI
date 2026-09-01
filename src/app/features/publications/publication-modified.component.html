@@ -2,9 +2,9 @@
   <div class="hero-copy">
     <span class="hero-icon"><lucide-icon [img]="icons.FilePenLine" [size]="21" /></span>
     <div>
-      <div class="eyebrow">Publication workspace</div>
-      <h1>Modified Publication <span>Titles</span></h1>
-      <p>Upload updated publication titles and review the saved modifications.</p>
+      <div class="eyebrow"></div>
+      <h1>Modified Publisher Titles <span>Titles</span></h1>
+      <p>Upload updated publisher titles and review the saved modifications.</p>
     </div>
   </div>
   <a class="back-action" routerLink="/publications"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to validation</a>
@@ -13,7 +13,7 @@
 <section class="action-card card">
   <div class="action-copy">
     <span><lucide-icon [img]="icons.FilePenLine" [size]="17" /></span>
-    <div><h2>Modified title spreadsheet</h2><p>Upload the completed .xlsx template to save publication title changes.</p></div>
+    <div><h2>Modified publisher title spreadsheet</h2><p>Upload the completed .xlsx template to save publisher title changes.</p></div>
   </div>
   <div class="action-buttons">
     <input #modifiedInput type="file" accept=".xlsx" hidden (change)="choose($event)" />

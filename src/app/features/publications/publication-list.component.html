@@ -2,9 +2,9 @@
   <div class="hero-copy">
     <span class="hero-icon"><lucide-icon [img]="icons.BookCopy" [size]="25" /></span>
     <div>
-      <div class="eyebrow">Publication workspace</div>
-      <h1>Publication <span>Titles</span></h1>
-      <p>Search and manage publication title records without affecting the main title library.</p>
+      <div class="eyebrow"></div>
+      <h1>Publisher Titles <span></span></h1>
+      <p>Search and manage publisher title records without affecting the main title library.</p>
     </div>
   </div>
   <a class="back-action" routerLink="/publications"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to validation</a>
@@ -15,8 +15,8 @@
     <div class="result-title">
       <span><lucide-icon [img]="icons.BookCopy" [size]="18" /></span>
       <div>
-        <strong>Publication title records</strong>
-        <small>@if(loading()){Fetching publication titles…}@else if(total()){ {{total()}} records found }@else{ Your results will appear below }</small>
+        <strong>Publisher Title Records</strong>
+        <small>@if(loading()){Fetching publisher titles…}@else if(total()){ {{total()}} records found }@else{ Your results will appear below }</small>
       </div>
     </div>
     <div class="toolbar-actions">

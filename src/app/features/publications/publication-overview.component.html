@@ -2,16 +2,16 @@
   <div class="hero-copy">
     <span class="hero-icon"><lucide-icon [img]="icons.LayoutDashboard" [size]="20" /></span>
     <div>
-      <div class="eyebrow">Publication workspace</div>
-      <h1>Publication <span>Overview</span></h1>
-      <p>Live summary of publication title records returned by the API.</p>
+      <div class="eyebrow"></div>
+      <h1>Publisher Title Validation <span></span></h1>
+      <p>Live summary of publisher title records returned by the API.</p>
     </div>
   </div>
-  <a class="view-action" routerLink="/publications/records">View publications <lucide-icon [img]="icons.ArrowRight" [size]="13" /></a>
+  <a class="view-action" routerLink="/publications/records">View publisher titles <lucide-icon [img]="icons.ArrowRight" [size]="13" /></a>
 </section>
 
 @if(loading()) {
-  <section class="summary-grid loading-summary" aria-label="Loading publication overview">
+  <section class="summary-grid loading-summary" aria-label="Loading publisher overview">
     @for(item of [1,2,3,4]; track item) { <article class="summary-card"><span></span><div><i></i><b></b><i></i></div></article> }
   </section>
   <section class="overview-loading card"><span></span><span></span><span></span><span></span></section>
