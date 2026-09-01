@@ -3,28 +3,42 @@
   <aside id="app-sidebar" class="sidebar" [class.open]="sidebarOpen()">
     <div class="brand">
       <div class="brand-mark"><lucide-icon [img]="icons.Sparkles" [size]="19" /></div>
-      <div class="brand-copy"><strong>TitleFlow</strong><span>Operations suite</span></div>
+      <div class="brand-copy"><strong>TitleFlow</strong><span>Validate Your Titles</span></div>
       <button class="icon-button collapse" aria-label="Hide sidebar" (click)="toggleSidebar()"><lucide-icon [img]="icons.ChevronLeft" [size]="18" /></button>
     </div>
-    <nav>
-      <p class="nav-label">Workspace</p>
-      <a routerLink="/dashboard" routerLinkActive="active"><lucide-icon [img]="icons.LayoutDashboard" [size]="19" /><span>Overview</span></a>
-      <a routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.BookOpen" [size]="19" /><span>View All Titles</span></a>
-      <a routerLink="/titles/upload" routerLinkActive="active"><lucide-icon [img]="icons.FileSpreadsheet" [size]="19" /><span>Import Titles</span></a>
-      <p class="nav-label spaced">Publication Titles</p>
-      <a routerLink="/publications" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.FileSpreadsheet" [size]="19" /><span>Title Validation</span></a>
-      <a routerLink="/publications/records" routerLinkActive="active"><lucide-icon [img]="icons.BookCopy" [size]="19" /><span>View Publication Titles</span></a>
-      <a routerLink="/publications/modified" routerLinkActive="active"><lucide-icon [img]="icons.FilePenLine" [size]="19" /><span>Modified Titles</span></a>
+    <nav class="side-nav">
+      <p class="nav-label"></p>
+
+      <section class="nav-group normal-title-group" aria-label="Normal titles">
+        <div class="nav-group-title">
+          <span><lucide-icon [img]="icons.BookOpen" [size]="16" /></span>
+          <div><strong>Title Validation</strong><small>Standard title records</small></div>
+        </div>
+        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.LayoutDashboard" [size]="17" /><span>Overview</span></a>
+        <a routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.BookOpen" [size]="17" /><span>View Titles</span></a>
+        <a routerLink="/titles/upload" routerLinkActive="active"><lucide-icon [img]="icons.FileSpreadsheet" [size]="17" /><span>Upload Titles</span></a>
+      </section>
+
+      <section class="nav-group publication-title-group" aria-label="Publication titles">
+        <div class="nav-group-title">
+          <span><lucide-icon [img]="icons.BookCopy" [size]="16" /></span>
+          <div><strong>Publication Titles</strong><small>Publisher title records</small></div>
+        </div>
+        <a routerLink="/publications/overview" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.LayoutDashboard" [size]="17" /><span>Overview</span></a>
+        <a routerLink="/publications" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.FileSpreadsheet" [size]="17" /><span>Validate & Upload</span></a>
+        <a routerLink="/publications/records" routerLinkActive="active"><lucide-icon [img]="icons.BookCopy" [size]="17" /><span>View Publications</span></a>
+        <a routerLink="/publications/modified" routerLinkActive="active"><lucide-icon [img]="icons.FilePenLine" [size]="17" /><span>Modified Titles</span></a>
+      </section>
     </nav>
     <div class="profile">
-      <div class="avatar">T</div><div><strong>Title Management</strong><span>Workspace</span></div>
+      <div class="avatar">T</div><div><strong></strong><span>Workspace</span></div>
     </div>
   </aside>
 
   <section class="workspace">
     <header class="topbar">
       <button class="icon-button menu" aria-label="Show sidebar" aria-controls="app-sidebar" [attr.aria-expanded]="sidebarOpen()" (click)="toggleSidebar()"><lucide-icon [img]="icons.Menu" [size]="21" /></button>
-      <div class="top-actions"><a class="primary-action" routerLink="/titles"><lucide-icon [img]="icons.BookOpen" [size]="18" />View all titles</a><a class="primary-action" routerLink="/titles/upload"><lucide-icon [img]="icons.Plus" [size]="18" />Import</a><button class="logout-action" type="button" (click)="logout()"><lucide-icon [img]="icons.LogOut" [size]="17" />Logout</button></div>
+      <div class="top-actions"><a class="primary-action" [routerLink]="publicationWorkspace() ? '/publications/records' : '/titles'"><lucide-icon [img]="publicationWorkspace() ? icons.BookCopy : icons.BookOpen" [size]="13" />{{publicationWorkspace() ? 'View publications' : 'View all titles'}}</a><a class="primary-action" [routerLink]="publicationWorkspace() ? '/publications' : '/titles/upload'"><lucide-icon [img]="icons.Plus" [size]="13" />Upload</a><button class="logout-action" type="button" (click)="logout()"><lucide-icon [img]="icons.LogOut" [size]="13" />Logout</button></div>
     </header>
     <main><router-outlet /></main>
   </section>

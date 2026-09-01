@@ -1,0 +1,95 @@
+<section class="overview-hero">
+  <div class="hero-copy">
+    <span class="hero-icon"><lucide-icon [img]="icons.LayoutDashboard" [size]="20" /></span>
+    <div>
+      <div class="eyebrow">Publication workspace</div>
+      <h1>Publication <span>Overview</span></h1>
+      <p>Live summary of publication title records returned by the API.</p>
+    </div>
+  </div>
+  <a class="view-action" routerLink="/publications/records">View publications <lucide-icon [img]="icons.ArrowRight" [size]="13" /></a>
+</section>
+
+@if(loading()) {
+  <section class="summary-grid loading-summary" aria-label="Loading publication overview">
+    @for(item of [1,2,3,4]; track item) { <article class="summary-card"><span></span><div><i></i><b></b><i></i></div></article> }
+  </section>
+  <section class="overview-loading card"><span></span><span></span><span></span><span></span></section>
+} @else if(overview(); as data) {
+  <section class="summary-grid">
+    <article class="summary-card">
+      <span class="summary-icon records"><lucide-icon [img]="icons.BookCopy" [size]="18" /></span>
+      <div><small>Total titles</small><strong>{{data.totalTitles.toLocaleString()}}</strong><p>All publication records</p></div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon clean"><lucide-icon [img]="icons.CircleCheckBig" [size]="18" /></span>
+      <div><small>Clean titles</small><strong>{{data.cleanTitles.toLocaleString()}}</strong><p>Validated publication records</p></div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon modified"><lucide-icon [img]="icons.FilePenLine" [size]="18" /></span>
+      <div><small>Modified titles</small><strong>{{data.modifiedTitles.toLocaleString()}}</strong><p>{{data.modifiedPercentage}}% of all titles</p></div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon month"><lucide-icon [img]="icons.FileSpreadsheet" [size]="18" /></span>
+      <div><small>Added this month</small><strong>{{data.uploadedThisMonth.toLocaleString()}}</strong><p>Current month uploads</p></div>
+    </article>
+  </section>
+
+  <section class="overview-grid">
+    <article class="records-card card">
+      <header class="section-heading">
+        <div><span><lucide-icon [img]="icons.BookCopy" [size]="17" /></span><div><h2>Recent publication records</h2><p>Latest records returned by the overview API</p></div></div>
+        <a routerLink="/publications/records">View all <lucide-icon [img]="icons.ArrowRight" [size]="13" /></a>
+      </header>
+
+      <div class="record-list">
+        @for(item of data.recentTitles; track item.id) {
+          <div class="record-row">
+            <span class="record-mark">{{item.title ? item.title.charAt(0) : 'T'}}</span>
+            <div class="record-title"><strong>{{item.title || ''}}</strong><span>{{item.codeReference || ''}} @if(lotNumber(item)){ · {{lotNumber(item)}} }</span></div>
+            <span class="paper-id">{{item.paperId || ''}}</span>
+            <span class="year">{{item.titleYear || ''}}</span>
+            <span class="status" [class.clean]="isStatus(item.status, 'clean')" [class.blocked]="isStatus(item.status, 'blocked')">{{item.status || ''}}</span>
+            <time>{{item.createdOn ? (item.createdOn | date:'dd-MM-yyyy') : ''}}</time>
+          </div>
+        } @empty {
+          <div class="empty-state"><lucide-icon [img]="icons.BookCopy" [size]="24" /><strong>No publication records found</strong><span>The overview API did not return any recent titles.</span></div>
+        }
+      </div>
+    </article>
+
+    <aside class="quick-card insights-card">
+      <div class="quick-heading"><span><lucide-icon [img]="icons.LayoutDashboard" [size]="17" /></span><div><h2>Publication insights</h2><p>Live totals from the overview API</p></div></div>
+      <div class="insight-row"><span>Original titles</span><strong>{{data.originalTitles.toLocaleString()}}</strong></div>
+      <div class="insight-row"><span>Unique lot numbers</span><strong>{{data.uniqueLotNumbers.toLocaleString()}}</strong></div>
+      <div class="insight-row"><span>Unique paper IDs</span><strong>{{data.uniquePaperIds.toLocaleString()}}</strong></div>
+      <div class="insight-row"><span>Unique code references</span><strong>{{data.uniqueCodeReferences.toLocaleString()}}</strong></div>
+      <div class="insight-row"><span>Financial years</span><strong>{{data.financialYears.toLocaleString()}}</strong></div>
+    </aside>
+  </section>
+
+  <section class="year-card card">
+    <header class="section-heading">
+      <div><span><lucide-icon [img]="icons.FileSpreadsheet" [size]="17" /></span><div><h2>Financial year breakdown</h2><p>Publication and modified title counts by year</p></div></div>
+    </header>
+    <div class="year-list">
+      @for(item of data.yearBreakdown; track item.titleYear) {
+        <div class="year-row">
+          <strong>{{item.titleYear || ''}}</strong>
+          <span class="year-bar"><i [style.width.%]="yearPercentage(item.totalTitles, maxYearTotal(data))"></i></span>
+          <span><b>{{item.totalTitles.toLocaleString()}}</b> titles</span>
+          <span><b>{{item.modifiedTitles.toLocaleString()}}</b> modified</span>
+        </div>
+      } @empty {
+        <div class="year-empty">No financial year breakdown found</div>
+      }
+    </div>
+  </section>
+} @else {
+  <section class="overview-empty card">
+    <lucide-icon [img]="icons.LayoutDashboard" [size]="26" />
+    <strong>No publication overview data found</strong>
+    <span>The overview API did not return any data.</span>
+    <button class="button" (click)="load()">Try again</button>
+  </section>
+}

@@ -86,5 +86,26 @@ export interface PagedPublicationResult<T> {
   totalPages: number;
 }
 
+export interface PublicationYearOverview {
+  titleYear: string;
+  totalTitles: number;
+  modifiedTitles: number;
+}
+
+export interface PublicationOverview {
+  totalTitles: number;
+  cleanTitles: number;
+  modifiedTitles: number;
+  originalTitles: number;
+  uploadedThisMonth: number;
+  uniqueLotNumbers: number;
+  uniquePaperIds: number;
+  uniqueCodeReferences: number;
+  financialYears: number;
+  modifiedPercentage: number;
+  yearBreakdown: PublicationYearOverview[];
+  recentTitles: PublicationRecord[];
+}
+
 export interface DeletePublicationResponse { deletedCount: number; }
 export interface SavePublicationResponse { savedCount: number; }

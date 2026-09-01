@@ -9,6 +9,7 @@ import {
   PublicationDropdownData,
   PublicationFilter,
   PublicationImportPreview,
+  PublicationOverview,
   PublicationRecord,
   SavePublicationResponse
 } from './publication.models';
@@ -20,6 +21,10 @@ export class PublicationApiService {
 
   search(filter: PublicationFilter): Observable<PagedPublicationResult<PublicationRecord>> {
     return this.http.get<PagedPublicationResult<PublicationRecord>>(this.base, { params: this.params(filter) });
+  }
+
+  getOverview(): Observable<PublicationOverview> {
+    return this.http.get<PublicationOverview>(`${this.base}/overview`);
   }
 
   deleteMany(ids: number[]): Observable<DeletePublicationResponse> {

@@ -1,6 +1,6 @@
 <section class="publication-hero">
   <div class="hero-copy">
-    <span class="hero-icon"><lucide-icon [img]="icons.FilePenLine" [size]="25" /></span>
+    <span class="hero-icon"><lucide-icon [img]="icons.FilePenLine" [size]="21" /></span>
     <div>
       <div class="eyebrow">Publication workspace</div>
       <h1>Modified Publication <span>Titles</span></h1>
@@ -12,13 +12,13 @@
 
 <section class="action-card card">
   <div class="action-copy">
-    <span><lucide-icon [img]="icons.FilePenLine" [size]="20" /></span>
+    <span><lucide-icon [img]="icons.FilePenLine" [size]="17" /></span>
     <div><h2>Modified title spreadsheet</h2><p>Upload the completed .xlsx template to save publication title changes.</p></div>
   </div>
   <div class="action-buttons">
     <input #modifiedInput type="file" accept=".xlsx" hidden (change)="choose($event)" />
-    <button class="button template-button" [disabled]="uploading() || downloading()" (click)="downloadTemplate()"><lucide-icon [img]="icons.Download" [size]="16" />{{downloading() ? 'Downloading…' : 'Download Template'}}</button>
-    <button class="button upload-button" [disabled]="uploading()" (click)="openPicker(modifiedInput)"><lucide-icon [img]="icons.Upload" [size]="16" />{{uploading() ? 'Uploading…' : 'Upload & Save'}}</button>
+    <button class="button template-button" [disabled]="uploading() || downloading()" (click)="downloadTemplate()"><lucide-icon [img]="icons.Download" [size]="13" />{{downloading() ? 'Downloading…' : 'Download Template'}}</button>
+    <button class="button upload-button" [disabled]="uploading()" (click)="openPicker(modifiedInput)"><lucide-icon [img]="icons.Upload" [size]="13" />{{uploading() ? 'Uploading…' : 'Upload & Save'}}</button>
   </div>
   @if(uploading()){<div class="progress-line"><span></span></div>}
 </section>

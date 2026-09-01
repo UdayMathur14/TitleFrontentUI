@@ -1,13 +1,13 @@
 <section class="publication-hero">
   <div class="hero-copy">
-    <span class="hero-icon"><lucide-icon [img]="icons.CloudUpload" [size]="25" /></span>
+    <span class="hero-icon"><lucide-icon [img]="icons.CloudUpload" [size]="21" /></span>
     <div>
       <div class="eyebrow">Publication workspace</div>
       <h1>Publication Title <span>Validation</span></h1>
       <p>Test the publication spreadsheet, review every result, then save clean rows.</p>
     </div>
   </div>
-  <a class="back-action" routerLink="/dashboard"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to overview</a>
+  <a class="back-action" routerLink="/publications/overview"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to overview</a>
 </section>
 
 <section class="upload-card card">
@@ -47,7 +47,7 @@
 </section>
 
 @if(error()){
-  <div class="error-banner"><lucide-icon [img]="icons.CircleAlert" [size]="18" /><div><strong>Publication import could not be completed</strong><span>{{error()}}</span></div></div>
+  <div class="error-banner"><lucide-icon [img]="icons.CircleAlert" [size]="18" /><div><strong>Publication upload could not be completed</strong><span>{{error()}}</span></div></div>
 }
 
 @if(preview(); as result){

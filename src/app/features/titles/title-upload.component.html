@@ -1,5 +1,5 @@
 <section class="import-hero">
-  <div class="hero-copy"><span class="hero-icon"><lucide-icon [img]="icons.CloudUpload" [size]="25" /></span><div><div class="eyebrow">Title management</div><h1>Import <span>Titles</span></h1><p>Test your Excel file, review every result, then save clean title records.</p></div></div>
+  <div class="hero-copy"><span class="hero-icon"><lucide-icon [img]="icons.CloudUpload" [size]="21" /></span><div><div class="eyebrow"></div><h1>Upload <span>Titles</span></h1><p>Test your Excel file, review every result, then save clean title records.</p></div></div>
   <a class="back-action" routerLink="/titles"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to titles</a>
 </section>
 
@@ -37,7 +37,7 @@
 </section>
 
 @if(error()){
-  <div class="error-banner"><lucide-icon [img]="icons.CircleAlert" [size]="18" /><div><strong>Import could not be completed</strong><span>{{error()}}</span></div></div>
+  <div class="error-banner"><lucide-icon [img]="icons.CircleAlert" [size]="18" /><div><strong>Upload could not be completed</strong><span>{{error()}}</span></div></div>
 }
 
 @if(preview(); as result){
@@ -51,7 +51,7 @@
   <section class="result-card card">
     <header class="result-heading">
       <div><span><lucide-icon [img]="icons.FileCheck2" [size]="18" /></span><div><h2>Test upload result</h2><p>{{result.fileName}} · {{result.totalRows}} rows checked</p></div></div>
-      <div class="result-tabs" role="group" aria-label="Filter import results">
+      <div class="result-tabs" role="group" aria-label="Filter upload results">
         <button [class.active]="resultView()==='All'" (click)="resultView.set('All')">All <b>{{result.totalRows}}</b></button>
         <button [class.active]="resultView()==='Clean'" (click)="resultView.set('Clean')">Clean <b>{{result.cleanCount}}</b></button>
         <button [class.active]="resultView()==='Blocked'" (click)="resultView.set('Blocked')">Blocked <b>{{result.blockedCount}}</b></button>

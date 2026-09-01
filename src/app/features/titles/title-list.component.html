@@ -1,7 +1,7 @@
 <section class="title-hero">
   <div class="hero-copy">
-    <span class="hero-icon"><lucide-icon [img]="icons.BookOpen" [size]="25" /></span>
-    <div><div class="eyebrow">Title management</div><h1>View <span>Titles</span></h1><p>Search, filter and manage your complete title library from one place.</p></div>
+    <span class="hero-icon"><lucide-icon [img]="icons.BookOpen" [size]="21" /></span>
+    <div><div class="eyebrow"></div><h1>View <span>Titles</span></h1><p>Search, filter and manage your complete title library from one place.</p></div>
   </div>
   <a class="back-action" routerLink="/dashboard"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to overview</a>
 </section>
@@ -26,12 +26,12 @@
         <div class="field"><label>Invoice number</label><input name="invoice" list="invoice-options" [(ngModel)]="filter.invoiceNumber" placeholder="Enter invoice number" /></div>
         <div class="field"><label>Record ID</label><div class="input-icon"><lucide-icon [img]="icons.Hash" [size]="15" /><input type="number" min="1" name="id" [(ngModel)]="filter.id" placeholder="Enter ID" /></div></div>
         <div class="field"><label>Financial year</label><div class="input-icon"><lucide-icon [img]="icons.CalendarDays" [size]="15" /><input name="year" list="year-options" [(ngModel)]="filter.titleYear" placeholder="e.g. 2025-26" /></div></div>
+        <div class="filter-buttons"><button type="button" class="button clear" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear all</button><button class="button dark"><lucide-icon [img]="icons.Search" [size]="15" />Search titles</button></div>
       </div>
       <datalist id="title-options">@for(option of dropdowns().titles;track option){<option [value]="option"></option>}</datalist>
       <datalist id="code-options">@for(option of dropdowns().codeReferences;track option){<option [value]="option"></option>}</datalist>
       <datalist id="invoice-options">@for(option of dropdowns().invoiceNumbers;track option){<option [value]="option"></option>}</datalist>
       <datalist id="year-options">@for(option of dropdowns().years;track option){<option [value]="option"></option>}</datalist>
-      <div class="filter-buttons"><button type="button" class="button clear" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear all</button><button class="button dark"><lucide-icon [img]="icons.Search" [size]="15" />Search titles</button></div>
     </form>
   }
 
