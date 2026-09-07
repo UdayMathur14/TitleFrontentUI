@@ -39,11 +39,15 @@
     <header class="topbar">
       <button class="icon-button menu" aria-label="Show sidebar" aria-controls="app-sidebar" [attr.aria-expanded]="sidebarOpen()" (click)="toggleSidebar()"><lucide-icon [img]="icons.Menu" [size]="21" /></button>
       <div class="top-actions">
-  <button class="logout-action" type="button" (click)="logout()">
-    <lucide-icon [img]="icons.LogOut" [size]="13" />
-    Logout
-  </button>
-</div>
+        <a class="dashboard-action" href="http://192.168.29.101:90/dashboard">
+          <lucide-icon [img]="icons.LayoutDashboard" [size]="14" />
+          Dashboard
+        </a>
+        <button class="logout-action" type="button" (click)="logout()">
+          <lucide-icon [img]="icons.LogOut" [size]="13" />
+          Logout
+        </button>
+      </div>
     </header>
     <main><router-outlet /></main>
   </section>

@@ -59,9 +59,13 @@
           <label>Paper ID</label>
           <input name="paperId" list="publication-paper-options" [(ngModel)]="filter.paperId" placeholder="Enter paper ID" />
         </div>
-        <div class="field">
+        <div class="field financial-year">
           <label>Financial year</label>
           <div class="input-icon"><lucide-icon [img]="icons.CalendarDays" [size]="15" /><input name="titleYear" list="publication-year-options" [(ngModel)]="filter.titleYear" placeholder="e.g. 2025-26" /></div>
+        </div>
+        <div class="filter-buttons">
+          <button type="button" class="button clear" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear all</button>
+          <button class="button dark"><lucide-icon [img]="icons.Search" [size]="15" />Search records</button>
         </div>
       </div>
 
@@ -71,10 +75,6 @@
       <datalist id="publication-paper-options">@for(option of dropdowns().paperIds; track option){<option [value]="option"></option>}</datalist>
       <datalist id="publication-year-options">@for(option of dropdowns().years; track option){<option [value]="option"></option>}</datalist>
 
-      <div class="filter-buttons">
-        <button type="button" class="button clear" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear all</button>
-        <button class="button dark"><lucide-icon [img]="icons.Search" [size]="15" />Search records</button>
-      </div>
     </form>
   }
 
