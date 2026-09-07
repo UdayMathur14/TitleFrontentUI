@@ -366,14 +366,15 @@ nav a:hover {
   min-width: 104px;
   height: 36px;
   padding: 0 14px;
-  border: 1px solid #cbd9e3;
+  border: 1px solid #294f68;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  color: #315f7d;
-  background: #f7fafc;
+  color: #fff;
+  background: linear-gradient(145deg, #356c8f, #294f68);
+  box-shadow: 0 6px 16px rgba(41, 79, 104, .2);
   text-decoration: none;
   font-size: 11px;
   font-weight: 750;
@@ -382,9 +383,9 @@ nav a:hover {
 
 .dashboard-action:hover {
   color: #fff;
-  border-color: #356c8f;
-  background: #356c8f;
-  box-shadow: 0 7px 18px rgba(53, 108, 143, .17);
+  border-color: #23465d;
+  background: linear-gradient(145deg, #2f6384, #23465d);
+  box-shadow: 0 8px 20px rgba(41, 79, 104, .27);
   transform: translateY(-1px);
 }
 
@@ -392,14 +393,15 @@ nav a:hover {
   min-width: 88px;
   height: 36px;
   padding: 0 14px;
-  border: 1px solid #e2d1d1;
+  border: 1px solid #8f4f4d;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  color: #985656;
-  background: #fff;
+  color: #fff;
+  background: linear-gradient(145deg, #a8615e, #8f4f4d);
+  box-shadow: 0 6px 16px rgba(126, 66, 64, .18);
   font-size: 11px;
   font-weight: 750;
   transition: .18s ease;
@@ -407,9 +409,9 @@ nav a:hover {
 
 .logout-action:hover {
   color: #fff;
-  border-color: #965a5a;
-  background: #965a5a;
-  box-shadow: 0 7px 18px rgba(120, 61, 61, .16);
+  border-color: #7f4442;
+  background: linear-gradient(145deg, #995653, #7f4442);
+  box-shadow: 0 8px 20px rgba(120, 61, 61, .26);
   transform: translateY(-1px);
 }
 
