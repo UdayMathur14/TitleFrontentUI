@@ -38,7 +38,12 @@
   <section class="workspace">
     <header class="topbar">
       <button class="icon-button menu" aria-label="Show sidebar" aria-controls="app-sidebar" [attr.aria-expanded]="sidebarOpen()" (click)="toggleSidebar()"><lucide-icon [img]="icons.Menu" [size]="21" /></button>
-      <div class="top-actions"><a class="primary-action" [routerLink]="publicationWorkspace() ? '/publications/records' : '/titles'"><lucide-icon [img]="publicationWorkspace() ? icons.BookCopy : icons.BookOpen" [size]="13" />{{publicationWorkspace() ? 'View publications' : 'View all titles'}}</a><a class="primary-action" [routerLink]="publicationWorkspace() ? '/publications' : '/titles/upload'"><lucide-icon [img]="icons.Plus" [size]="13" />Upload</a><button class="logout-action" type="button" (click)="logout()"><lucide-icon [img]="icons.LogOut" [size]="13" />Logout</button></div>
+      <div class="top-actions">
+  <button class="logout-action" type="button" (click)="logout()">
+    <lucide-icon [img]="icons.LogOut" [size]="13" />
+    Logout
+  </button>
+</div>
     </header>
     <main><router-outlet /></main>
   </section>
