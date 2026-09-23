@@ -52,3 +52,26 @@
     <main><router-outlet /></main>
   </section>
 </div>
+
+@if(loader.visible()) {
+  <div class="global-loader" [class.publication-loader]="publicationWorkspace()" role="status" aria-live="polite" aria-label="Please wait">
+    <span class="loader-ambient loader-ambient-one" aria-hidden="true"></span>
+    <span class="loader-ambient loader-ambient-two" aria-hidden="true"></span>
+    <div class="global-loader-card">
+      <div class="global-loader-visual">
+        <span class="loader-halo"></span>
+        <span class="loader-ring loader-ring-outer"></span>
+        <span class="loader-ring loader-ring-inner"></span>
+        <span class="loader-orbit-dot"></span>
+        <span class="loader-core"><lucide-icon [img]="icons.Sparkles" [size]="20" [strokeWidth]="2.2" /></span>
+      </div>
+      <div class="global-loader-copy">
+        <small class="loader-kicker"><i></i>Title validation engine</small>
+        <strong>{{loader.message()}}</strong>
+        <span>Working through your records securely</span>
+      </div>
+      <span class="loader-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="loader-progress" aria-hidden="true"><i></i></span>
+    </div>
+  </div>
+}

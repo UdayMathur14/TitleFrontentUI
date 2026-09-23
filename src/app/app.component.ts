@@ -2,6 +2,7 @@ import { Component, HostListener, inject, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { BarChart3, Bell, BookCopy, BookOpen, ChevronLeft, ChevronsLeft, FilePenLine, FileSpreadsheet, LayoutDashboard, LogOut, LucideAngularModule, Menu, Plus, Search, Settings2, Sparkles } from 'lucide-angular';
+import { GlobalLoaderService } from './core/services/global-loader.service';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,7 @@ import { BarChart3, Bell, BookCopy, BookOpen, ChevronLeft, ChevronsLeft, FilePen
 })
 export class AppComponent {
   private readonly router = inject(Router);
+  readonly loader = inject(GlobalLoaderService);
   readonly icons = { BarChart3, Bell, BookCopy, BookOpen, ChevronLeft, ChevronsLeft, FilePenLine, FileSpreadsheet, LayoutDashboard, LogOut, Menu, Plus, Search, Settings2, Sparkles };
   readonly sidebarOpen = signal(true);
   readonly mobile = signal(window.innerWidth < 960);
