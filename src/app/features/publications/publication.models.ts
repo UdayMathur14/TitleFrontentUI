@@ -1,4 +1,4 @@
-export type PublicationCategory = 'Clean' | 'Blocked' | 'Duplicate' | 'Invalid';
+export type PublicationCategory = 'Clean' | 'Blocked' | 'Invalid';
 
 export interface PublicationRecord {
   id: number;
@@ -53,15 +53,22 @@ export interface PublicationImportRow {
   codeReference: string;
   title: string;
   titleYear: string;
-  blockedId?: number | null;
+  category: PublicationCategory;
+  message: string;
+  blockedById?: number | null;
+  blockedByRow?: number | null;
   blockedByPaperId?: string | null;
+  blockedByLotNumber?: string | null;
+  blockedByCodeReference?: string | null;
+  blockedByTitle?: string | null;
+
+  // Backward-compatible aliases used by an earlier publication API build.
+  blockedId?: number | null;
   blockedByInvoiceNo?: string | null;
   blockedByLotNo?: string | null;
   blockedCodeRef?: string | null;
-  blockedByTitle?: string | null;
-  updatedTitle: string;
-  status: string;
-  category?: PublicationCategory;
+  updatedTitle?: string;
+  status?: string;
 }
 
 export interface PublicationImportPreview {
@@ -69,11 +76,14 @@ export interface PublicationImportPreview {
   totalRows: number;
   cleanCount: number;
   blockedCount: number;
-  duplicateCount: number;
+  duplicateCount?: number;
   invalidCount?: number;
-  cleanTitles: PublicationImportRow[];
-  blockedTitles: PublicationImportRow[];
-  duplicateTitlesInExcel: PublicationImportRow[];
+  rows?: PublicationImportRow[];
+
+  // Backward-compatible split collections used by an earlier API build.
+  cleanTitles?: PublicationImportRow[];
+  blockedTitles?: PublicationImportRow[];
+  duplicateTitlesInExcel?: PublicationImportRow[];
   invalidTitles?: PublicationImportRow[];
   importToken: string;
 }

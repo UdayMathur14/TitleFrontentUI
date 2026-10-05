@@ -50,10 +50,15 @@ export class PublicationImportComponent {
   readonly allRows = computed<PublicationImportRow[]>(() => {
     const value = this.preview();
     if (!value) return [];
+
+    // The current publication API returns a single Rows collection. Keep the
+    // split collections as a fallback so older deployed API builds still work.
+    if (value.rows) return value.rows.map(row => this.normalizeRow(row));
+
     return [
-      ...value.cleanTitles.map(row => ({ ...row, category: 'Clean' as const })),
-      ...value.blockedTitles.map(row => ({ ...row, category: 'Blocked' as const })),
-      ...value.duplicateTitlesInExcel.map(row => ({ ...row, category: 'Duplicate' as const })),
+      ...(value.cleanTitles ?? []).map(row => ({ ...row, category: 'Clean' as const, message: row.message || 'Clean' })),
+      ...(value.blockedTitles ?? []).map(row => ({ ...row, category: 'Blocked' as const, message: row.message || 'Blocked' })),
+      ...(value.duplicateTitlesInExcel ?? []).map(row => ({ ...row, category: 'Invalid' as const, message: row.message || 'Duplicate row in Excel' })),
       ...(value.invalidTitles ?? []).map(row => ({ ...row, category: 'Invalid' as const }))
     ];
   });
@@ -152,6 +157,44 @@ export class PublicationImportComponent {
     });
   }
 
+  exportResults() {
+    const result = this.preview();
+    const rows = this.allRows();
+    if (!result || rows.length === 0) {
+      this.notify('There are no publication validation rows to export.');
+      return;
+    }
+
+    const headings = [
+      'Row No', 'Lot Number', 'Paper ID', 'CodeRef', 'Title', 'FinancialYear',
+      'Result', 'Status Message', 'Blocked DB ID', 'Blocked By Row',
+      'Blocked Paper ID', 'Blocked Lot Number', 'Blocked CodeRef', 'Blocked Existing Title'
+    ];
+    const data = rows.map(row => [
+      row.rowNumber,
+      this.lotNumber(row),
+      row.paperId || '',
+      row.codeReference || '',
+      row.title || '',
+      row.titleYear || '',
+      row.category,
+      row.message || row.status || row.category,
+      this.blockedDatabaseId(row),
+      row.blockedByRow ?? '',
+      row.blockedByPaperId || '',
+      this.blockedLotNumber(row),
+      this.blockedCodeReference(row),
+      row.blockedByTitle || ''
+    ]);
+    const csv = '\uFEFF' + [headings, ...data]
+      .map(columns => columns.map(value => this.csvCell(value)).join(','))
+      .join('\r\n');
+    const name = (result.fileName || 'PublicationTitles').replace(/\.xlsx$/i, '').replace(/[^a-z0-9_-]+/gi, '-');
+
+    saveBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `${name}-Validation-Result.csv`);
+    this.notify('Publication validation result exported successfully.');
+  }
+
   formatFileSize(bytes: number) {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -163,11 +206,38 @@ export class PublicationImportComponent {
   }
 
   blockedLotNumber(row: PublicationImportRow) {
-    return row.blockedByLotNo || row.blockedByInvoiceNo || '';
+    return row.blockedByLotNumber || row.blockedByLotNo || row.blockedByInvoiceNo || '';
+  }
+
+  blockedDatabaseId(row: PublicationImportRow) {
+    return row.blockedById ?? row.blockedId ?? '';
+  }
+
+  blockedCodeReference(row: PublicationImportRow) {
+    return row.blockedByCodeReference || row.blockedCodeRef || '';
   }
 
   notify(message: string) {
     this.toast.set(message);
     setTimeout(() => this.toast.set(''), 2800);
+  }
+
+  private normalizeRow(row: PublicationImportRow): PublicationImportRow {
+    const rawCategory = String(row.category || row.status || '').toLowerCase();
+    const category: PublicationCategory = rawCategory === 'clean'
+      ? 'Clean'
+      : rawCategory === 'blocked'
+        ? 'Blocked'
+        : 'Invalid';
+    return {
+      ...row,
+      category,
+      message: row.message || row.status || category
+    };
+  }
+
+  private csvCell(value: unknown) {
+    const text = value === null || value === undefined ? '' : String(value);
+    return `"${text.replace(/"/g, '""')}"`;
   }
 }

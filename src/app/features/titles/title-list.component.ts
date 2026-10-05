@@ -22,6 +22,8 @@ import {
   X
 } from 'lucide-angular';
 import { CreateTitleRequest, DropdownData, TitleFilter, TitleRecord } from '../../core/models/title.models';
+import { TITLE_MENU_PERMISSIONS } from '../../core/auth/title-menu-permissions';
+import { PermissionService } from '../../core/services/permission.service';
 import { TitleApiService } from '../../core/services/title-api.service';
 import { apiErrorMessage } from '../../shared/api-error';
 import { saveBlob } from '../../shared/download';
@@ -37,6 +39,7 @@ type EditableTitle = Pick<CreateTitleRequest, 'codeReference' | 'invoiceNumber' 
 })
 export class TitleListComponent implements OnInit {
   private readonly api = inject(TitleApiService);
+  private readonly permissions = inject(PermissionService);
 
   readonly icons = {
     ArrowLeft, BookOpen, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Download,
@@ -59,6 +62,9 @@ export class TitleListComponent implements OnInit {
   readonly deleteIds = signal<number[]>([]);
   readonly bulkDelete = signal(false);
   readonly deleting = signal(false);
+  readonly canManage = computed(() =>
+    this.permissions.hasAny(TITLE_MENU_PERMISSIONS.invoice.editTitles)
+  );
 
   filter: TitleFilter = {
     page: 1,
@@ -73,7 +79,7 @@ export class TitleListComponent implements OnInit {
   editForm: EditableTitle = { codeReference: '', invoiceNumber: '', title: '', titleYear: '' };
 
   readonly allSelected = computed(() =>
-    this.records().length > 0 && this.records().every(record => this.selected().has(record.id))
+    this.canManage() && this.records().length > 0 && this.records().every(record => this.selected().has(record.id))
   );
 
   ngOnInit() {
@@ -118,12 +124,14 @@ export class TitleListComponent implements OnInit {
   nextPage() { if (this.filter.page < this.totalPages()) { this.filter.page++; this.load(); } }
 
   toggle(id: number) {
+    if (!this.canManage()) return;
     const next = new Set(this.selected());
     next.has(id) ? next.delete(id) : next.add(id);
     this.selected.set(next);
   }
 
   toggleAll() {
+    if (!this.canManage()) return;
     this.selected.set(this.allSelected() ? new Set() : new Set(this.records().map(record => record.id)));
   }
 
@@ -144,6 +152,7 @@ export class TitleListComponent implements OnInit {
   }
 
   openEdit(record: TitleRecord) {
+    if (!this.canManage()) return;
     this.editing.set(record);
     this.editError.set('');
     this.editForm = {
@@ -162,7 +171,7 @@ export class TitleListComponent implements OnInit {
 
   saveEdit() {
     const record = this.editing();
-    if (!record || this.saving()) return;
+    if (!this.canManage() || !record || this.saving()) return;
 
     const value: EditableTitle = {
       codeReference: this.editForm.codeReference.trim(),
@@ -201,6 +210,7 @@ export class TitleListComponent implements OnInit {
   }
 
   askDelete(record?: TitleRecord) {
+    if (!this.canManage()) return;
     const ids = record ? [record.id] : [...this.selected()];
     if (ids.length) {
       this.bulkDelete.set(!record);
@@ -214,7 +224,7 @@ export class TitleListComponent implements OnInit {
 
   confirmDelete() {
     const ids = this.deleteIds();
-    if (!ids.length || this.deleting()) return;
+    if (!this.canManage() || !ids.length || this.deleting()) return;
 
     this.deleting.set(true);
     const request = this.bulkDelete() ? this.api.deleteMany(ids) : this.api.deleteOne(ids[0]);

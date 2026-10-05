@@ -11,6 +11,7 @@ export const globalLoaderInterceptor: HttpInterceptorFn = (request, next) => {
 
 function loaderMessage(request: HttpRequest<unknown>) {
   const url = request.url.toLowerCase();
+  if (url.includes('/fetch-internal-permissions')) return 'Validating your access…';
   if (url.includes('/template') || url.includes('/export')) return 'Preparing download…';
   if (request.method === 'DELETE') return 'Deleting records…';
   if (url.includes('/commit')) return 'Saving records…';

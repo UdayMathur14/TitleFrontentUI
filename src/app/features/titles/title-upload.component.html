@@ -26,7 +26,7 @@
       <div class="process-note"><lucide-icon [img]="icons.Info" [size]="15" /><p><strong>Test before saving</strong><span>Test Upload checks clean, duplicate, blocked and invalid rows without saving anything.</span></p></div>
       <div class="action-buttons">
         <button class="button test-button" [disabled]="!file() || loading()" (click)="testUpload()"><lucide-icon [img]="icons.ScanSearch" [size]="16" />Test Upload</button>
-        <button class="button save-button" [disabled]="!preview() || !preview()?.cleanCount || loading() || saved()" (click)="commit()"><lucide-icon [img]="saved() ? icons.CheckCircle2 : icons.Save" [size]="16" />{{saved() ? 'Saved' : 'Upload & Save'}}</button>
+        <button class="button save-button" [disabled]="!preview() || ((preview()?.cleanCount || 0) + (preview()?.pendingApprovalCount || 0) < 1) || loading() || saved()" (click)="commit()"><lucide-icon [img]="saved() ? icons.CheckCircle2 : icons.Save" [size]="16" />{{saved() ? 'Saved' : 'Upload & Save'}}</button>
       </div>
     </div>
   </div>
@@ -41,9 +41,10 @@
 }
 
 @if(preview(); as result){
-  <section class="summary-grid">
+  <section class="summary-grid" [class.with-approval]="result.pendingApprovalCount">
     <article><span class="metric-icon total"><lucide-icon [img]="icons.FileSpreadsheet" [size]="18" /></span><div><small>Total rows</small><strong>{{result.totalRows}}</strong></div></article>
     <article><span class="metric-icon clean"><lucide-icon [img]="icons.CheckCircle2" [size]="18" /></span><div><small>Clean</small><strong>{{result.cleanCount}}</strong></div></article>
+    <article class="approval-metric"><span class="metric-icon approval"><lucide-icon [img]="icons.CircleAlert" [size]="18" /></span><div><small>Going for approval</small><strong>{{result.pendingApprovalCount || 0}}</strong></div></article>
     <article><span class="metric-icon blocked"><lucide-icon [img]="icons.ShieldAlert" [size]="18" /></span><div><small>Blocked</small><strong>{{result.blockedCount}}</strong></div></article>
     <article><span class="metric-icon invalid"><lucide-icon [img]="icons.XCircle" [size]="18" /></span><div><small>Invalid</small><strong>{{result.invalidCount}}</strong></div></article>
   </section>
@@ -54,20 +55,24 @@
       <div class="result-tabs" role="group" aria-label="Filter upload results">
         <button [class.active]="resultView()==='All'" (click)="resultView.set('All')">All <b>{{result.totalRows}}</b></button>
         <button [class.active]="resultView()==='Clean'" (click)="resultView.set('Clean')">Clean <b>{{result.cleanCount}}</b></button>
+        @if(result.pendingApprovalCount){<button [class.active]="resultView()==='PendingApproval'" (click)="resultView.set('PendingApproval')">Approval <b>{{result.pendingApprovalCount}}</b></button>}
         <button [class.active]="resultView()==='Blocked'" (click)="resultView.set('Blocked')">Blocked <b>{{result.blockedCount}}</b></button>
         @if(result.invalidCount){<button [class.active]="resultView()==='Invalid'" (click)="resultView.set('Invalid')">Invalid <b>{{result.invalidCount}}</b></button>}
       </div>
     </header>
 
-    <div class="result-help"><lucide-icon [img]="icons.Info" [size]="14" /><span>Blocked reference fields are populated only for blocked or duplicate rows. They remain empty for clean rows.</span></div>
+    @if(result.pendingApprovalCount){
+      <div class="approval-banner"><lucide-icon [img]="icons.CircleAlert" [size]="16" /><div><strong>{{result.pendingApprovalCount}} {{result.pendingApprovalCount === 1 ? 'title is' : 'titles are'}} blocked and going for approval</strong><span>Click Upload &amp; Save to place these invoice-mismatch records in the approval queue. They are not Clean until approved.</span></div></div>
+    }
+    <div class="result-help"><lucide-icon [img]="icons.Info" [size]="14" /><span>Blocked reference fields show the existing record responsible for a block or approval request. They remain empty for clean rows.</span></div>
 
     <div class="table-wrap"><table>
       <thead><tr><th>Row No</th><th>Invoice No</th><th>CodeRef</th><th class="title-column">Title</th><th>FinancialYear</th><th>Status</th><th>BlockedByRow</th><th>BlockInvoiceNo</th><th>BlockCodeRef</th></tr></thead>
       <tbody>
         @for(row of visibleRows();track row.rowNumber){
-          <tr [class.clean-row]="row.category==='Clean'" [class.blocked-row]="row.category==='Blocked'" [class.invalid-row]="row.category==='Invalid'">
+          <tr [class.clean-row]="row.category==='Clean'" [class.approval-row]="row.category==='PendingApproval'" [class.blocked-row]="row.category==='Blocked'" [class.invalid-row]="row.category==='Invalid'">
             <td><span class="row-number">{{row.rowNumber}}</span></td><td>{{row.invoiceNumber || ''}}</td><td><code>{{row.codeReference || ''}}</code></td><td class="title-cell">{{row.title || ''}}</td><td><span class="year">{{row.titleYear || ''}}</span></td>
-            <td><span class="status" [class.clean]="row.category==='Clean'" [class.blocked]="row.category==='Blocked'" [class.invalid]="row.category==='Invalid'">{{row.message || row.category}}</span></td>
+            <td><div class="status-cell"><span class="status" [class.clean]="row.category==='Clean'" [class.approval]="row.category==='PendingApproval'" [class.blocked]="row.category==='Blocked'" [class.invalid]="row.category==='Invalid'">{{row.category === 'PendingApproval' ? 'Pending approval' : row.category}}</span>@if(row.category === 'PendingApproval'){<small class="approval-note">Blocked · Going for approval</small>}@if(row.message && row.message !== row.category){<small class="validation-message">{{row.message}}</small>}</div></td>
             <td class="block-detail">{{row.blockedByRow || ''}}</td><td class="block-detail">{{row.blockedByInvoiceNumber || ''}}</td><td class="block-detail">{{row.blockedByCodeReference || ''}}</td>
           </tr>
         } @empty {<tr><td colspan="9"><div class="empty-result"><lucide-icon [img]="icons.FileCheck2" [size]="22" /><strong>No {{resultView().toLowerCase()}} rows</strong><span>This test result does not contain rows in the selected category.</span></div></td></tr>}

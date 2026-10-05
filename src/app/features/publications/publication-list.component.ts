@@ -20,6 +20,8 @@ import {
   X
 } from 'lucide-angular';
 import { apiErrorMessage } from '../../shared/api-error';
+import { TITLE_MENU_PERMISSIONS } from '../../core/auth/title-menu-permissions';
+import { PermissionService } from '../../core/services/permission.service';
 import { PublicationApiService } from './publication-api.service';
 import { PublicationDropdownData, PublicationFilter, PublicationRecord } from './publication.models';
 
@@ -32,6 +34,7 @@ import { PublicationDropdownData, PublicationFilter, PublicationRecord } from '.
 })
 export class PublicationListComponent implements OnInit {
   private readonly api = inject(PublicationApiService);
+  private readonly permissions = inject(PermissionService);
 
   readonly icons = {
     ArrowLeft, BookCopy, CalendarDays, ChevronDown, ChevronLeft, ChevronRight,
@@ -50,11 +53,14 @@ export class PublicationListComponent implements OnInit {
   readonly toast = signal('');
   readonly deleteIds = signal<number[]>([]);
   readonly deleting = signal(false);
+  readonly canManage = computed(() =>
+    this.permissions.hasAny(TITLE_MENU_PERMISSIONS.publication.editTitles)
+  );
 
   filter: PublicationFilter = this.emptyFilter();
 
   readonly allSelected = computed(() =>
-    this.records().length > 0 && this.records().every(record => this.selected().has(record.id))
+    this.canManage() && this.records().length > 0 && this.records().every(record => this.selected().has(record.id))
   );
   readonly lotOptions = computed(() =>
     this.dropdowns().lotNumbers ?? this.dropdowns().lotNos ?? this.dropdowns().invoiceNumbers ?? []
@@ -116,16 +122,19 @@ export class PublicationListComponent implements OnInit {
   }
 
   toggle(id: number) {
+    if (!this.canManage()) return;
     const next = new Set(this.selected());
     next.has(id) ? next.delete(id) : next.add(id);
     this.selected.set(next);
   }
 
   toggleAll() {
+    if (!this.canManage()) return;
     this.selected.set(this.allSelected() ? new Set() : new Set(this.records().map(record => record.id)));
   }
 
   askDelete() {
+    if (!this.canManage()) return;
     const ids = [...this.selected()];
     if (ids.length) this.deleteIds.set(ids);
   }
@@ -136,7 +145,7 @@ export class PublicationListComponent implements OnInit {
 
   confirmDelete() {
     const ids = this.deleteIds();
-    if (!ids.length || this.deleting()) return;
+    if (!this.canManage() || !ids.length || this.deleting()) return;
 
     this.deleting.set(true);
     this.api.deleteMany(ids).subscribe({

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
@@ -18,6 +18,8 @@ import {
 } from 'lucide-angular';
 import { apiErrorMessage } from '../../shared/api-error';
 import { saveBlob } from '../../shared/download';
+import { TITLE_MENU_PERMISSIONS } from '../../core/auth/title-menu-permissions';
+import { PermissionService } from '../../core/services/permission.service';
 import { PublicationApiService } from './publication-api.service';
 import { ModifiedPublicationFilter, PublicationRecord } from './publication.models';
 
@@ -30,6 +32,7 @@ import { ModifiedPublicationFilter, PublicationRecord } from './publication.mode
 })
 export class PublicationModifiedComponent implements OnInit {
   private readonly api = inject(PublicationApiService);
+  private readonly permissions = inject(PermissionService);
 
   readonly icons = {
     ArrowLeft, ChevronLeft, ChevronRight, CircleAlert, Download, FilePenLine,
@@ -44,6 +47,9 @@ export class PublicationModifiedComponent implements OnInit {
   readonly totalPages = signal(0);
   readonly paperIds = signal<string[]>([]);
   readonly toast = signal('');
+  readonly canManage = computed(() =>
+    this.permissions.hasAny(TITLE_MENU_PERMISSIONS.publication.editTitles)
+  );
 
   filter: ModifiedPublicationFilter = this.emptyFilter();
 
@@ -84,11 +90,13 @@ export class PublicationModifiedComponent implements OnInit {
   }
 
   openPicker(input: HTMLInputElement) {
+    if (!this.canManage()) return;
     input.value = '';
     input.click();
   }
 
   choose(event: Event) {
+    if (!this.canManage()) return;
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
@@ -116,7 +124,7 @@ export class PublicationModifiedComponent implements OnInit {
   }
 
   downloadTemplate() {
-    if (this.downloading()) return;
+    if (!this.canManage() || this.downloading()) return;
     this.downloading.set(true);
     this.api.modifiedTemplate().subscribe({
       next: blob => {

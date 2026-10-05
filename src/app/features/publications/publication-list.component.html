@@ -20,7 +20,7 @@
       </div>
     </div>
     <div class="toolbar-actions">
-      @if(selected().size){
+      @if(canManage() && selected().size){
         <span class="selected-count">{{selected().size}} selected</span>
         <button class="button danger" (click)="askDelete()"><lucide-icon [img]="icons.Trash2" [size]="15" />Delete selected</button>
       }
@@ -82,7 +82,7 @@
     <table>
       <thead>
         <tr>
-          <th class="check"><input aria-label="Select all publication records" type="checkbox" [checked]="allSelected()" (change)="toggleAll()" /></th>
+          @if(canManage()){<th class="check"><input aria-label="Select all publication records" type="checkbox" [checked]="allSelected()" (change)="toggleAll()" /></th>}
           <th>ID</th>
           <th>Code Ref</th>
           <th>Lot No</th>
@@ -97,11 +97,11 @@
       </thead>
       <tbody>
         @if(loading()){
-          @for(i of [1,2,3,4,5]; track i){<tr class="skeleton-row"><td colspan="11"><span></span></td></tr>}
+          @for(i of [1,2,3,4,5]; track i){<tr class="skeleton-row"><td [attr.colspan]="canManage() ? 11 : 10"><span></span></td></tr>}
         } @else {
           @for(record of records(); track record.id){
             <tr [class.selected]="selected().has(record.id)">
-              <td class="check"><input [attr.aria-label]="'Select publication '+record.id" type="checkbox" [checked]="selected().has(record.id)" (change)="toggle(record.id)" /></td>
+              @if(canManage()){<td class="check"><input [attr.aria-label]="'Select publication '+record.id" type="checkbox" [checked]="selected().has(record.id)" (change)="toggle(record.id)" /></td>}
               <td><span class="record-id">#{{record.id}}</span></td>
               <td><code>{{record.codeReference}}</code></td>
               <td><span class="lot-number">{{lotNumber(record)}}</span></td>
@@ -114,7 +114,7 @@
               <td><span class="status-pill" [class.clean]="record.status === 'Clean'" [class.blocked]="record.status === 'Blocked'">{{record.status}}</span></td>
             </tr>
           } @empty {
-            <tr><td colspan="11"><div class="empty-state">
+            <tr><td [attr.colspan]="canManage() ? 11 : 10"><div class="empty-state">
               <span><lucide-icon [img]="icons.BookCopy" [size]="25" /></span>
               <h3>No records found</h3>
               <p>No publication title records match your current filters.</p>
@@ -138,7 +138,7 @@
   }
 </section>
 
-@if(deleteIds().length){
+@if(canManage() && deleteIds().length){
   <div class="modal-backdrop" (click)="cancelDelete()">
     <section class="delete-modal" role="alertdialog" aria-modal="true" aria-labelledby="delete-publication-heading" (click)="$event.stopPropagation()">
       <span><lucide-icon [img]="icons.TriangleAlert" [size]="23" /></span>

@@ -10,6 +10,7 @@
   <a class="back-action" routerLink="/publications"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to validation</a>
 </section>
 
+@if(canManage()){
 <section class="action-card card">
   <div class="action-copy">
     <span><lucide-icon [img]="icons.FilePenLine" [size]="17" /></span>
@@ -22,6 +23,7 @@
   </div>
   @if(uploading()){<div class="progress-line"><span></span></div>}
 </section>
+}
 
 <section class="records-card card">
   <header class="records-toolbar">

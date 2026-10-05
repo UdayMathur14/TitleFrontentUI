@@ -9,26 +9,45 @@
     <nav class="side-nav">
       <p class="nav-label"></p>
 
+      @if (canAccessInvoiceMenu()) {
       <section class="nav-group normal-title-group" aria-label="Normal titles">
         <div class="nav-group-title">
           <span><lucide-icon [img]="icons.BookOpen" [size]="16" /></span>
           <div><strong>Title Validation Invoice</strong><small>Standard title records</small></div>
         </div>
-        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.LayoutDashboard" [size]="17" /><span>Overview</span></a>
-        <a routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.BookOpen" [size]="17" /><span>View Titles Invoice</span></a>
-        <a routerLink="/titles/upload" routerLinkActive="active"><lucide-icon [img]="icons.FileSpreadsheet" [size]="17" /><span>Upload Titles Invoice</span></a>
+        @if (canAccess(menuPermissions.invoice.overview)) {
+          <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.LayoutDashboard" [size]="17" /><span>Overview</span></a>
+        }
+        @if (canAccess(menuPermissions.invoice.viewTitles)) {
+          <a routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.BookOpen" [size]="17" /><span>View Titles Invoice</span></a>
+          <a routerLink="/titles/multiple-invoice" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.ListChecks" [size]="17" /><span>Multiple Title Invoice</span></a>
+        }
+        @if (canAccess(menuPermissions.invoice.uploadTitles)) {
+          <a routerLink="/titles/upload" routerLinkActive="active"><lucide-icon [img]="icons.FileSpreadsheet" [size]="17" /><span>Upload Titles Invoice</span></a>
+        }
       </section>
+      }
 
+      @if (canAccessPublicationMenu()) {
       <section class="nav-group publication-title-group" aria-label="Publication titles">
         <div class="nav-group-title">
           <span><lucide-icon [img]="icons.BookCopy" [size]="16" /></span>
           <div><strong>Publisher Title Validation</strong><small>Publisher title records</small></div>
         </div>
-        <a routerLink="/publications/overview" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.LayoutDashboard" [size]="17" /><span>Overview</span></a>
-        <a routerLink="/publications" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.FileSpreadsheet" [size]="17" /><span>Validate & Upload</span></a>
-        <a routerLink="/publications/records" routerLinkActive="active"><lucide-icon [img]="icons.BookCopy" [size]="17" /><span>View Titles</span></a>
-        <a routerLink="/publications/modified" routerLinkActive="active"><lucide-icon [img]="icons.FilePenLine" [size]="17" /><span>Modified Titles</span></a>
+        @if (canAccess(menuPermissions.publication.overview)) {
+          <a routerLink="/publications/overview" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.LayoutDashboard" [size]="17" /><span>Overview</span></a>
+        }
+        @if (canAccess(menuPermissions.publication.validateAndUpload)) {
+          <a routerLink="/publications" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.FileSpreadsheet" [size]="17" /><span>Validate & Upload</span></a>
+        }
+        @if (canAccess(menuPermissions.publication.viewTitles)) {
+          <a routerLink="/publications/records" routerLinkActive="active"><lucide-icon [img]="icons.BookCopy" [size]="17" /><span>View Titles</span></a>
+        }
+        @if (canAccess(menuPermissions.publication.modifiedTitles)) {
+          <a routerLink="/publications/modified" routerLinkActive="active"><lucide-icon [img]="icons.FilePenLine" [size]="17" /><span>Modified Titles</span></a>
+        }
       </section>
+      }
     </nav>
     <div class="profile">
       <div class="avatar">EIP</div><div><strong>Ennoble IP</strong><span></span></div>
@@ -39,6 +58,12 @@
     <header class="topbar">
       <button class="icon-button menu" aria-label="Show sidebar" aria-controls="app-sidebar" [attr.aria-expanded]="sidebarOpen()" (click)="toggleSidebar()"><lucide-icon [img]="icons.Menu" [size]="21" /></button>
       <div class="top-actions">
+        <button class="theme-action" type="button" [attr.aria-pressed]="darkMode()" [attr.aria-label]="darkMode() ? 'Switch to light theme' : 'Switch to dark theme'" [title]="darkMode() ? 'Light theme' : 'Dark theme'" (click)="toggleTheme()">
+          <span class="theme-action-icon">
+            <lucide-icon [img]="darkMode() ? icons.Sun : icons.Moon" [size]="14" [strokeWidth]="2.2" />
+          </span>
+          <span>{{ darkMode() ? 'Light' : 'Dark' }}</span>
+        </button>
         <a class="dashboard-action" href="http://192.168.29.101:90/dashboard">
           <lucide-icon [img]="icons.LayoutDashboard" [size]="14" />
           Dashboard

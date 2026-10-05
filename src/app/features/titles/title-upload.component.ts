@@ -107,7 +107,10 @@ export class TitleUploadComponent {
         this.preview.set(value);
         this.resultView.set('All');
         this.loading.set(false);
-        this.notify('Test upload completed. Review the result before saving.');
+        const approvalCount = value.pendingApprovalCount ?? 0;
+        this.notify(approvalCount
+          ? `Test completed. ${approvalCount} ${approvalCount === 1 ? 'row is' : 'rows are'} blocked and will go for approval after saving.`
+          : 'Test upload completed. Review the result before saving.');
       },
       error: error => {
         this.loading.set(false);
@@ -119,7 +122,8 @@ export class TitleUploadComponent {
 
   commit() {
     const value = this.preview();
-    if (!value || value.cleanCount < 1 || this.loading() || this.saved()) return;
+    const committableCount = (value?.cleanCount ?? 0) + (value?.pendingApprovalCount ?? 0);
+    if (!value || committableCount < 1 || this.loading() || this.saved()) return;
 
     this.loading.set(true);
     this.error.set('');
@@ -127,7 +131,12 @@ export class TitleUploadComponent {
       next: result => {
         this.loading.set(false);
         this.saved.set(true);
-        this.notify(`${result.savedCount} clean titles saved successfully.`);
+        const cleanCount = result.cleanCount ?? value.cleanCount ?? 0;
+        const pendingCount = result.pendingApprovalCount ?? value.pendingApprovalCount ?? 0;
+        const approvalMessage = pendingCount
+          ? ` ${pendingCount} ${pendingCount === 1 ? 'title was' : 'titles were'} sent for approval.`
+          : '';
+        this.notify(`${cleanCount} clean ${cleanCount === 1 ? 'title' : 'titles'} saved.${approvalMessage}`);
       },
       error: error => {
         this.loading.set(false);

@@ -1,5 +1,5 @@
 export type TitleStatus = 'Clean' | 'Blocked' | string;
-export type ImportCategory = 'Clean' | 'Blocked' | 'Invalid';
+export type ImportCategory = 'Clean' | 'PendingApproval' | 'Blocked' | 'Invalid';
 
 export interface TitleRecord {
   id: number;
@@ -66,6 +66,7 @@ export interface ImportPreview {
   fileName: string;
   totalRows: number;
   cleanCount: number;
+  pendingApprovalCount: number;
   blockedCount: number;
   invalidCount: number;
   rows: ImportRow[];
@@ -82,4 +83,8 @@ export interface CreateTitleRequest {
 
 export type UpdateTitleRequest = CreateTitleRequest;
 export interface DeleteTitlesResponse { deletedCount: number; }
-export interface CommitImportResponse { savedCount: number; }
+export interface CommitImportResponse {
+  savedCount: number;
+  cleanCount: number;
+  pendingApprovalCount: number;
+}
