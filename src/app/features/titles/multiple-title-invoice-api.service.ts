@@ -14,7 +14,7 @@ export class MultipleTitleInvoiceApiService {
   private readonly http = inject(HttpClient);
 
   // This workflow belongs only to regular Titles. Publication APIs remain isolated.
-  private readonly base = `${environment.apiUrl}/titles/approvals`;
+  private readonly base = `${environment.apiUrl}/titles/multiple-invoices`;
 
   search(filter: MultipleTitleInvoiceFilter): Observable<MultipleTitleInvoiceResult> {
     let params = new HttpParams()

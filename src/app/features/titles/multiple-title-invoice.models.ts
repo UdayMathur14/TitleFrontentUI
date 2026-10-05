@@ -15,6 +15,9 @@ export interface MultipleTitleInvoiceRecord {
   existingInvoiceNumber?: string | null;
   existingCodeReference?: string | null;
   existingStatus?: string | null;
+  reviewDecision?: string | null;
+  reviewedBy?: string | null;
+  reviewedOn?: string | null;
   createdBy?: string | null;
   createdOn?: string | null;
 }
@@ -26,6 +29,7 @@ export interface MultipleTitleInvoiceFilter {
   title?: string;
   invoiceNumber?: string;
   titleYear?: string;
+  status?: string;
 }
 
 export interface MultipleTitleInvoiceResult {
@@ -39,10 +43,13 @@ export interface MultipleTitleInvoiceResult {
 export interface MultipleInvoiceDecisionRequest {
   ids: number[];
   decision: MultipleInvoiceDecision;
+  reviewedBy?: string | null;
 }
 
 export interface MultipleInvoiceDecisionResponse {
-  decision: MultipleInvoiceDecision;
+  decision: 'Approved' | 'Rejected' | string;
   status: string;
   updatedCount: number;
+  reviewedBy?: string;
+  reviewedOn?: string;
 }

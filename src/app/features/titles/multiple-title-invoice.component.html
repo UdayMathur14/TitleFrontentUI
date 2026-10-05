@@ -4,30 +4,36 @@
     <div>
       <div class="eyebrow">Invoice title review</div>
       <h1>Multiple Title <span>Invoice</span></h1>
-      <p>Review existing titles uploaded against a different invoice number.</p>
+      <p>Review pending titles and audit completed approval decisions.</p>
     </div>
   </div>
   <a class="back-action" routerLink="/titles"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to titles</a>
 </section>
 
 <section class="page-summary" aria-label="Current page review summary">
-  <article class="summary-card pending"><span><lucide-icon [img]="icons.CircleAlert" [size]="17" /></span><div><small>Total awaiting approval</small><strong>{{total()}}</strong></div></article>
-  <article class="summary-card page-count"><span><lucide-icon [img]="icons.Layers3" [size]="17" /></span><div><small>Shown on this page</small><strong>{{pendingCount()}}</strong></div></article>
-  <article class="summary-card selected-summary"><span><lucide-icon [img]="icons.CheckCheck" [size]="17" /></span><div><small>Selected for review</small><strong>{{selected().size}}</strong></div></article>
-  <div class="workflow-note"><lucide-icon [img]="icons.FileCheck2" [size]="17" /><p><strong>Decision outcome</strong><span>Approved records become Clean. Rejected records retain a Rejected status.</span></p></div>
+  <article class="summary-card pending"><span><lucide-icon [img]="icons.CircleAlert" [size]="17" /></span><div><small>{{viewMode() === 'PendingApproval' ? 'Awaiting approval' : 'Documented decisions'}}</small><strong>{{total()}}</strong></div></article>
+  <article class="summary-card page-count"><span><lucide-icon [img]="icons.Layers3" [size]="17" /></span><div><small>Shown on this page</small><strong>{{records().length}}</strong></div></article>
+  <article class="summary-card selected-summary"><span><lucide-icon [img]="icons.CheckCheck" [size]="17" /></span><div><small>{{viewMode() === 'PendingApproval' ? 'Selected for review' : 'Review history'}}</small><strong>{{viewMode() === 'PendingApproval' ? selected().size : total()}}</strong></div></article>
+  <div class="workflow-note"><lucide-icon [img]="icons.FileCheck2" [size]="17" /><p><strong>Decision audit</strong><span>Every approval or rejection keeps its final decision, reviewer and review date.</span></p></div>
 </section>
+
+<nav class="review-view-tabs" aria-label="Multiple title invoice views">
+  <button [class.active]="viewMode() === 'PendingApproval'" (click)="switchView('PendingApproval')"><lucide-icon [img]="icons.CircleAlert" [size]="15" /><span>Pending review</span></button>
+  <button [class.active]="viewMode() === 'Approved'" (click)="switchView('Approved')"><lucide-icon [img]="icons.CheckCheck" [size]="15" /><span>Approved history</span></button>
+  <button [class.active]="viewMode() === 'Rejected'" (click)="switchView('Rejected')"><lucide-icon [img]="icons.XCircle" [size]="15" /><span>Rejected history</span></button>
+</nav>
 
 <section class="review-card card">
   <header class="review-toolbar">
     <div class="result-title">
       <span><lucide-icon [img]="icons.Layers3" [size]="18" /></span>
-      <div><strong>Invoice mismatch review</strong><small>@if(loading()){Loading review queue…}@else if(total()){ {{total()}} records found }@else{ No records found }</small></div>
+      <div><strong>{{viewTitle()}}</strong><small>@if(loading()){Loading review records…}@else if(total()){ {{total()}} records found }@else{ No records found }</small></div>
     </div>
     <div class="toolbar-actions">
-      @if(canReview() && selected().size){
+      @if(showReviewControls()){
         <span class="selected-count">{{selected().size}} selected</span>
-        <button class="button approve" (click)="askDecision('Approve')"><lucide-icon [img]="icons.Check" [size]="15" />Approve</button>
-        <button class="button reject" (click)="askDecision('Reject')"><lucide-icon [img]="icons.X" [size]="15" />Reject</button>
+        <button class="button approve" [disabled]="!selected().size" (click)="askDecision('Approve')"><lucide-icon [img]="icons.Check" [size]="15" />Approve selected</button>
+        <button class="button reject" [disabled]="!selected().size" (click)="askDecision('Reject')"><lucide-icon [img]="icons.X" [size]="15" />Reject selected</button>
       }
       <button class="button filter-toggle" [class.active]="filterOpen()" (click)="filterOpen.set(!filterOpen())"><lucide-icon [img]="icons.SlidersHorizontal" [size]="15" />Filters<lucide-icon class="chevron" [class.up]="filterOpen()" [img]="icons.ChevronDown" [size]="14" /></button>
       <button class="square" aria-label="Refresh review queue" title="Refresh records" (click)="load()"><lucide-icon [img]="icons.RefreshCw" [size]="16" /></button>
@@ -36,7 +42,7 @@
 
   @if(filterOpen()){
     <form class="filters" (ngSubmit)="applyFilters()">
-      <div class="filter-heading"><span><lucide-icon [img]="icons.Filter" [size]="15" /></span><div><strong>Find an invoice mismatch</strong><small>Search the approval queue using one or more fields</small></div></div>
+      <div class="filter-heading"><span><lucide-icon [img]="icons.Filter" [size]="15" /></span><div><strong>Find a multiple-invoice title</strong><small>Search pending and reviewed records using one or more fields</small></div></div>
       <div class="filter-grid">
         <div class="field"><label>Code reference</label><input name="codeReference" [(ngModel)]="filter.codeReference" placeholder="Enter code reference" /></div>
         <div class="field title-filter"><label>Title</label><div class="input-icon"><lucide-icon [img]="icons.Search" [size]="15" /><input name="title" [(ngModel)]="filter.title" placeholder="Search title" /></div></div>
@@ -50,16 +56,16 @@
   <div class="table-wrap">
     <table>
       <thead><tr>
-        @if(canReview()){<th class="check"><input aria-label="Select all pending records" type="checkbox" [checked]="allPendingSelected()" (change)="toggleAllPending()" /></th>}
-        <th>ID</th><th>Code Ref</th><th class="title-column">Title</th><th>Existing Invoice</th><th>Uploaded Invoice</th><th>Financial Year</th><th>Submitted</th><th>Status</th>@if(canReview()){<th>Actions</th>}
+        @if(showReviewControls()){<th class="check"><input aria-label="Select all pending records" type="checkbox" [checked]="allPendingSelected()" (change)="toggleAllPending()" /></th>}
+        <th>ID</th><th>Code Ref</th><th class="title-column">Title</th><th>Existing Invoice</th><th>Uploaded Invoice</th><th>Financial Year</th><th>Submitted</th><th>Decision</th><th>Reviewed By</th><th>Reviewed On</th>@if(showReviewControls()){<th class="actions-column">Actions</th>}
       </tr></thead>
       <tbody>
         @if(loading()){
-          @for(i of [1,2,3,4,5]; track i){<tr class="skeleton-row"><td [attr.colspan]="canReview() ? 10 : 8"><span></span></td></tr>}
+          @for(i of [1,2,3,4,5]; track i){<tr class="skeleton-row"><td [attr.colspan]="showReviewControls() ? 12 : 10"><span></span></td></tr>}
         } @else {
           @for(record of records(); track record.id){
             <tr [class.selected]="selected().has(record.id)" [class.resolved]="!isPending(record)">
-              @if(canReview()){
+              @if(showReviewControls()){
                 <td class="check"><input [attr.aria-label]="'Select review record '+record.id" type="checkbox" [disabled]="!isPending(record)" [checked]="selected().has(record.id)" (change)="toggle(record)" /></td>
               }
               <td><span class="record-id">#{{record.id}}</span></td>
@@ -69,9 +75,11 @@
               <td><div class="invoice-change"><lucide-icon [img]="icons.ArrowRight" [size]="13" /><span class="invoice incoming">{{record.invoiceNumber || '—'}}</span></div></td>
               <td><span class="year">{{record.titleYear || '—'}}</span></td>
               <td><div class="submitted"><strong>{{record.createdBy || '—'}}</strong><span>{{record.createdOn ? (record.createdOn | date:'dd-MM-yyyy') : '—'}}</span></div></td>
-              <td><span class="status pending">Pending approval</span></td>
-              @if(canReview()){
-                <td><div class="row-actions">
+              <td><span class="status" [class.pending]="isPending(record)" [class.approved]="record.reviewDecision === 'Approved'" [class.rejected]="record.reviewDecision === 'Rejected'">{{decisionLabel(record)}}</span></td>
+              <td><strong class="reviewer">{{record.reviewedBy || '—'}}</strong></td>
+              <td><div class="review-date">@if(record.reviewedOn){<strong>{{record.reviewedOn | date:'dd-MM-yyyy'}}</strong><span>{{record.reviewedOn | date:'hh:mm a'}}</span>}@else{<span>—</span>}</div></td>
+              @if(showReviewControls()){
+                <td class="actions-cell"><div class="row-actions">
                   @if(isPending(record)){
                     <button class="approve-one" aria-label="Approve record" title="Approve" (click)="askDecision('Approve', record)"><lucide-icon [img]="icons.Check" [size]="14" /></button>
                     <button class="reject-one" aria-label="Reject record" title="Reject" (click)="askDecision('Reject', record)"><lucide-icon [img]="icons.X" [size]="14" /></button>
@@ -80,7 +88,7 @@
               }
             </tr>
           } @empty {
-            <tr><td [attr.colspan]="canReview() ? 10 : 8"><div class="empty-state"><span><lucide-icon [img]="icons.Layers3" [size]="25" /></span><h3>No multiple-invoice records found</h3><p>@if(loadMessage()){The review API is not available yet. Once connected, matching title invoices will appear here.}@else{No records match the selected filters.}</p>@if(!loadMessage()){<button class="button" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear filters</button>}</div></td></tr>
+            <tr><td [attr.colspan]="showReviewControls() ? 12 : 10"><div class="empty-state"><span><lucide-icon [img]="icons.Layers3" [size]="25" /></span><h3>No {{viewTitle()}} found</h3><p>@if(loadMessage()){The review API is not available yet. Once connected, matching title invoices will appear here.}@else{No records match the selected filters.}</p>@if(!loadMessage()){<button class="button" (click)="clear()"><lucide-icon [img]="icons.X" [size]="15" />Clear filters</button>}</div></td></tr>
           }
         }
       </tbody>
@@ -92,7 +100,7 @@
   }
 </section>
 
-@if(canReview() && decision(); as reviewDecision){
+@if(showReviewControls() && decision(); as reviewDecision){
   <div class="modal-backdrop" (click)="cancelDecision()">
     <section class="decision-modal" [class.rejecting]="reviewDecision === 'Reject'" role="alertdialog" aria-modal="true" aria-labelledby="decision-heading" (click)="$event.stopPropagation()">
       <span><lucide-icon [img]="reviewDecision === 'Approve' ? icons.CheckCheck : icons.XCircle" [size]="24" /></span>

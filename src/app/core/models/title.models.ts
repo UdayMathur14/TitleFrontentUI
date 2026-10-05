@@ -58,7 +58,6 @@ export interface ImportRow {
   message: string;
   blockedByInvoiceNumber?: string | null;
   blockedByCodeReference?: string | null;
-  // Reserved for the requested UI column. The current backend contract does not return this value.
   blockedByRow?: number | null;
 }
 
@@ -85,6 +84,6 @@ export type UpdateTitleRequest = CreateTitleRequest;
 export interface DeleteTitlesResponse { deletedCount: number; }
 export interface CommitImportResponse {
   savedCount: number;
-  cleanCount: number;
-  pendingApprovalCount: number;
+  cleanCount?: number;
+  pendingApprovalCount?: number;
 }

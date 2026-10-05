@@ -67,6 +67,16 @@ export class PublicationImportComponent {
     const view = this.resultView();
     return view === 'All' ? this.allRows() : this.allRows().filter(row => row.category === view);
   });
+  readonly committableCount = computed(() => {
+    const preview = this.preview();
+    if (!preview) return 0;
+    const countFromRows = this.allRows().filter(row => row.category === 'Clean').length;
+    const countFromSummary = Number(preview.cleanCount) || 0;
+    return Math.max(countFromRows, countFromSummary);
+  });
+  readonly canCommit = computed(() =>
+    !!this.preview()?.importToken && !this.loading() && !this.saved()
+  );
 
   openPicker(input: HTMLInputElement) {
     input.value = '';
@@ -133,7 +143,7 @@ export class PublicationImportComponent {
 
   commit() {
     const value = this.preview();
-    if (!value || value.cleanCount < 1 || this.loading() || this.saved()) return;
+    if (!value || !this.canCommit()) return;
 
     this.loading.set(true);
     this.error.set('');

@@ -1,5 +1,5 @@
 <section class="import-hero">
-  <div class="hero-copy"><span class="hero-icon"><lucide-icon [img]="icons.CloudUpload" [size]="21" /></span><div><div class="eyebrow"></div><h1>Upload <span>Titles</span></h1><p>Test your Excel file, review every result, then save clean title records.</p></div></div>
+  <div class="hero-copy"><span class="hero-icon"><lucide-icon [img]="icons.CloudUpload" [size]="21" /></span><div><div class="eyebrow"></div><h1>Upload <span>Titles</span></h1><p>Test your Excel file, review every result, then save clean and approval-queue records.</p></div></div>
   <a class="back-action" routerLink="/titles"><lucide-icon [img]="icons.ArrowLeft" [size]="16" />Back to titles</a>
 </section>
 
@@ -23,16 +23,15 @@
     </div>
 
     <div class="upload-actions">
-      <div class="process-note"><lucide-icon [img]="icons.Info" [size]="15" /><p><strong>Test before saving</strong><span>Test Upload checks clean, duplicate, blocked and invalid rows without saving anything.</span></p></div>
+      <div class="process-note"><lucide-icon [img]="icons.Info" [size]="15" /><p><strong>Test before saving</strong><span>Test Upload checks clean, approval, duplicate, blocked and invalid rows without saving anything.</span></p></div>
       <div class="action-buttons">
         <button class="button test-button" [disabled]="!file() || loading()" (click)="testUpload()"><lucide-icon [img]="icons.ScanSearch" [size]="16" />Test Upload</button>
-        <button class="button save-button" [disabled]="!preview() || ((preview()?.cleanCount || 0) + (preview()?.pendingApprovalCount || 0) < 1) || loading() || saved()" (click)="commit()"><lucide-icon [img]="saved() ? icons.CheckCircle2 : icons.Save" [size]="16" />{{saved() ? 'Saved' : 'Upload & Save'}}</button>
       </div>
     </div>
   </div>
 
   @if(loading()){
-    <div class="processing"><span class="spinner"></span><div><strong>{{preview() ? 'Saving clean title records' : 'Testing spreadsheet rows'}}</strong><small>Please wait while the file is being processed.</small></div></div>
+    <div class="processing"><span class="spinner"></span><div><strong>{{preview() ? 'Saving tested title records' : 'Testing spreadsheet rows'}}</strong><small>Please wait while the file is being processed.</small></div></div>
   }
 </section>
 
@@ -62,8 +61,12 @@
     </header>
 
     @if(result.pendingApprovalCount){
-      <div class="approval-banner"><lucide-icon [img]="icons.CircleAlert" [size]="16" /><div><strong>{{result.pendingApprovalCount}} {{result.pendingApprovalCount === 1 ? 'title is' : 'titles are'}} blocked and going for approval</strong><span>Click Upload &amp; Save to place these invoice-mismatch records in the approval queue. They are not Clean until approved.</span></div></div>
+      <div class="approval-banner"><lucide-icon [img]="icons.CircleAlert" [size]="16" /><div><strong>{{result.pendingApprovalCount}} {{result.pendingApprovalCount === 1 ? 'title is' : 'titles are'}} blocked and going for approval</strong><span>Click Save Tested Data to place these invoice-mismatch records in the approval queue. They are not Clean until approved.</span></div></div>
     }
+    <div class="result-save-bar">
+      <div><lucide-icon [img]="icons.FileCheck2" [size]="16" /><p><strong>Test completed</strong><span>This result is ready. Save it directly—there is no need to select or test the file again.</span></p></div>
+      <button class="button save-button" [disabled]="!canCommit()" title="Save this tested result without selecting the file again" (click)="commit()"><lucide-icon [img]="saved() ? icons.CheckCircle2 : icons.Save" [size]="15" />{{saved() ? 'Result Saved' : 'Save Tested Data'}}</button>
+    </div>
     <div class="result-help"><lucide-icon [img]="icons.Info" [size]="14" /><span>Blocked reference fields show the existing record responsible for a block or approval request. They remain empty for clean rows.</span></div>
 
     <div class="table-wrap"><table>

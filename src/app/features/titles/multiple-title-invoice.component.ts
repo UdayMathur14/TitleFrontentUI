@@ -22,7 +22,7 @@ import {
   X,
   XCircle
 } from 'lucide-angular';
-import { TITLE_MENU_PERMISSIONS } from '../../core/auth/title-menu-permissions';
+import { TEMPORARILY_BYPASS_UI_PERMISSIONS, TITLE_MENU_PERMISSIONS } from '../../core/auth/title-menu-permissions';
 import { PermissionService } from '../../core/services/permission.service';
 import { apiErrorMessage } from '../../shared/api-error';
 import { MultipleTitleInvoiceApiService } from './multiple-title-invoice-api.service';
@@ -31,6 +31,8 @@ import {
   MultipleTitleInvoiceFilter,
   MultipleTitleInvoiceRecord
 } from './multiple-title-invoice.models';
+
+type ReviewView = 'PendingApproval' | 'Approved' | 'Rejected';
 
 @Component({
   selector: 'app-multiple-title-invoice',
@@ -60,18 +62,28 @@ export class MultipleTitleInvoiceComponent implements OnInit {
   readonly loadMessage = signal('');
   readonly decision = signal<MultipleInvoiceDecision | null>(null);
   readonly decisionIds = signal<number[]>([]);
+  readonly viewMode = signal<ReviewView>('PendingApproval');
 
   readonly canReview = computed(() =>
+    TEMPORARILY_BYPASS_UI_PERMISSIONS ||
     this.permissions.hasAny(TITLE_MENU_PERMISSIONS.invoice.editTitles)
   );
   readonly pendingRecords = computed(() => this.records().filter(record => this.isPending(record)));
   readonly pendingCount = computed(() => this.pendingRecords().length);
+  readonly showReviewControls = computed(() => this.canReview() && this.viewMode() === 'PendingApproval');
+  readonly viewTitle = computed(() => {
+    switch (this.viewMode()) {
+      case 'Approved': return 'Approved Multiple Invoice Titles';
+      case 'Rejected': return 'Rejected Multiple Invoice Titles';
+      default: return 'Pending Multiple Invoice Titles';
+    }
+  });
   readonly allPendingSelected = computed(() =>
-    this.canReview() && this.pendingRecords().length > 0 &&
+    this.showReviewControls() && this.pendingRecords().length > 0 &&
     this.pendingRecords().every(record => this.selected().has(record.id))
   );
 
-  filter: MultipleTitleInvoiceFilter = this.emptyFilter();
+  filter: MultipleTitleInvoiceFilter = this.emptyFilter('PendingApproval');
 
   ngOnInit() {
     this.load();
@@ -104,26 +116,33 @@ export class MultipleTitleInvoiceComponent implements OnInit {
   }
 
   clear() {
-    this.filter = this.emptyFilter();
+    this.filter = this.emptyFilter(this.viewMode());
+    this.load();
+  }
+
+  switchView(view: ReviewView) {
+    if (this.viewMode() === view) return;
+    this.viewMode.set(view);
+    this.filter = this.emptyFilter(view);
     this.load();
   }
 
   toggle(record: MultipleTitleInvoiceRecord) {
-    if (!this.canReview() || !this.isPending(record)) return;
+    if (!this.showReviewControls() || !this.isPending(record)) return;
     const next = new Set(this.selected());
     next.has(record.id) ? next.delete(record.id) : next.add(record.id);
     this.selected.set(next);
   }
 
   toggleAllPending() {
-    if (!this.canReview()) return;
+    if (!this.showReviewControls()) return;
     this.selected.set(this.allPendingSelected()
       ? new Set()
       : new Set(this.pendingRecords().map(record => record.id)));
   }
 
   askDecision(decision: MultipleInvoiceDecision, record?: MultipleTitleInvoiceRecord) {
-    if (!this.canReview()) return;
+    if (!this.showReviewControls()) return;
     const ids = record
       ? (this.isPending(record) ? [record.id] : [])
       : [...this.selected()];
@@ -141,10 +160,10 @@ export class MultipleTitleInvoiceComponent implements OnInit {
   confirmDecision() {
     const decision = this.decision();
     const ids = this.decisionIds();
-    if (!this.canReview() || !decision || !ids.length || this.processing()) return;
+    if (!this.showReviewControls() || !decision || !ids.length || this.processing()) return;
 
     this.processing.set(true);
-    this.api.decide({ ids, decision }).subscribe({
+    this.api.decide({ ids, decision, reviewedBy: this.reviewerName() }).subscribe({
       next: result => {
         this.processing.set(false);
         this.decision.set(null);
@@ -184,12 +203,42 @@ export class MultipleTitleInvoiceComponent implements OnInit {
     return String(record.status || '').toLowerCase() === status.toLowerCase();
   }
 
+  decisionLabel(record: MultipleTitleInvoiceRecord) {
+    if (record.reviewDecision) return record.reviewDecision;
+    if (this.statusIs(record, 'Rejected')) return 'Rejected';
+    if (this.statusIs(record, 'Clean')) return 'Approved';
+    return 'Pending approval';
+  }
+
   notify(message: string) {
     this.toast.set(message);
     setTimeout(() => this.toast.set(''), 3000);
   }
 
-  private emptyFilter(): MultipleTitleInvoiceFilter {
-    return { page: 1, pageSize: 100, codeReference: '', title: '', invoiceNumber: '', titleYear: '' };
+  private reviewerName(): string {
+    const storedName = localStorage.getItem('userName')?.trim();
+    if (storedName) return storedName;
+
+    try {
+      const profile = JSON.parse(localStorage.getItem('profile') ?? '{}') as Record<string, unknown>;
+      const name = profile['userName'] ?? profile['UserName'] ?? profile['name'];
+      if (typeof name === 'string' && name.trim()) return name.trim();
+
+      const token = String(profile['accessToken'] ?? profile['token'] ?? localStorage.getItem('umsToken') ?? '');
+      const payloadPart = token.split('.')[1];
+      if (payloadPart) {
+        const payload = JSON.parse(atob(payloadPart.replace(/-/g, '+').replace(/_/g, '/'))) as Record<string, unknown>;
+        const claim = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+          ?? payload['name'] ?? payload['unique_name'] ?? payload['sub'];
+        if (typeof claim === 'string' && claim.trim()) return claim.trim();
+      }
+      return 'Unknown reviewer';
+    } catch {
+      return 'Unknown reviewer';
+    }
+  }
+
+  private emptyFilter(status: ReviewView): MultipleTitleInvoiceFilter {
+    return { page: 1, pageSize: 100, codeReference: '', title: '', invoiceNumber: '', titleYear: '', status };
   }
 }

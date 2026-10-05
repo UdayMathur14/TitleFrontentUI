@@ -36,7 +36,6 @@
       <div class="process-note"><lucide-icon [img]="icons.Info" [size]="15" /><p><strong>Validate before saving</strong><span>Test Upload checks clean, blocked, duplicate and invalid publication rows without saving data.</span></p></div>
       <div class="action-buttons">
         <button class="button test-button" [disabled]="!file() || loading()" (click)="testUpload()"><lucide-icon [img]="icons.ScanSearch" [size]="16" />Test Upload</button>
-        <button class="button save-button" [disabled]="!preview() || !preview()?.cleanCount || loading() || saved()" (click)="commit()"><lucide-icon [img]="saved() ? icons.CheckCircle2 : icons.Save" [size]="16" />{{saved() ? 'Saved' : 'Upload & Save'}}</button>
       </div>
     </div>
   </div>
@@ -72,6 +71,10 @@
       </div>
     </header>
 
+    <div class="result-save-bar">
+      <div><lucide-icon [img]="icons.FileCheck2" [size]="16" /><p><strong>Test completed</strong><span>Save this same tested result directly—there is no need to choose or test the file again.</span></p></div>
+      <button class="button save-button" [disabled]="!canCommit()" title="Save this tested result without selecting the file again" (click)="commit()"><lucide-icon [img]="saved() ? icons.CheckCircle2 : icons.Save" [size]="15" />{{saved() ? 'Result Saved' : 'Save Tested Data'}}</button>
+    </div>
     <div class="result-help"><lucide-icon [img]="icons.Info" [size]="14" /><span>Every tested row is shown below. Blocked rows include the exact existing database record that caused the conflict.</span></div>
 
     <div class="table-wrap">

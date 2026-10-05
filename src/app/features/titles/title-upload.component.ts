@@ -53,6 +53,9 @@ export class TitleUploadComponent {
     const view = this.resultView();
     return view === 'All' ? preview.rows : preview.rows.filter(row => row.category === view);
   });
+  readonly canCommit = computed(() =>
+    !!this.preview()?.importToken && !this.loading() && !this.saved()
+  );
 
   openPicker(input: HTMLInputElement) {
     input.value = '';
@@ -122,17 +125,31 @@ export class TitleUploadComponent {
 
   commit() {
     const value = this.preview();
-    const committableCount = (value?.cleanCount ?? 0) + (value?.pendingApprovalCount ?? 0);
-    if (!value || committableCount < 1 || this.loading() || this.saved()) return;
+    if (!value || !this.canCommit()) return;
 
     this.loading.set(true);
     this.error.set('');
     this.api.commitImport(value.importToken).subscribe({
       next: result => {
         this.loading.set(false);
+        const savedCount = Number(result.savedCount) || 0;
+        const cleanCount = Number(result.cleanCount ?? value.cleanCount) || 0;
+        const pendingCount = Number(result.pendingApprovalCount ?? value.pendingApprovalCount) || 0;
+        const expectedPendingCount = Number(value.pendingApprovalCount) || 0;
+
+        if (savedCount < 1) {
+          this.saved.set(false);
+          this.error.set('The API returned 0 saved records. The tested result was not saved.');
+          return;
+        }
+
         this.saved.set(true);
-        const cleanCount = result.cleanCount ?? value.cleanCount ?? 0;
-        const pendingCount = result.pendingApprovalCount ?? value.pendingApprovalCount ?? 0;
+        if (expectedPendingCount > pendingCount) {
+          this.error.set(`${expectedPendingCount} approval ${expectedPendingCount === 1 ? 'row was' : 'rows were'} present in the test result, but the running API did not confirm saving them. Publish the latest approval-enabled backend, then test and save the file again.`);
+          this.notify(`${savedCount} records were processed, but approval rows were not confirmed.`);
+          return;
+        }
+
         const approvalMessage = pendingCount
           ? ` ${pendingCount} ${pendingCount === 1 ? 'title was' : 'titles were'} sent for approval.`
           : '';
