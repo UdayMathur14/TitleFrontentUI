@@ -16,17 +16,24 @@ tbody tr.resolved .actions-cell{background:#fcfcfd}
 :host-context(html[data-theme='dark']) tbody tr:hover .actions-cell,:host-context(html[data-theme='dark']) tbody tr.selected .actions-cell{background:#16283a}
 :host-context(html[data-theme='dark']) tbody tr.resolved .actions-cell{background:#111e2e}
 
-.review-view-tabs{width:max-content;max-width:100%;margin:0 0 10px;padding:4px;display:flex;align-items:center;gap:4px;overflow-x:auto;border:1px solid #dfe8ec;border-radius:12px;background:rgba(255,255,255,.78);box-shadow:0 8px 24px rgba(33,55,77,.045)}
-.review-view-tabs button{height:34px;padding:0 13px;border:0;border-radius:9px;display:flex;align-items:center;gap:7px;color:#718093;background:transparent;font-size:9.5px;font-weight:750;white-space:nowrap;transition:.18s}
-.review-view-tabs button:hover{color:#216f69;background:#eff7f5}
-.review-view-tabs button.active{color:#fff;background:linear-gradient(135deg,#1f766f,#2c9688);box-shadow:0 6px 14px rgba(30,119,108,.2)}
+.review-view-tabs{width:max-content;max-width:100%;margin:0 0 10px;padding:5px;display:flex;align-items:center;gap:7px;overflow-x:auto;border:1px solid #dce5eb;border-radius:13px;background:rgba(255,255,255,.9);box-shadow:0 8px 24px rgba(33,55,77,.055)}
+.review-view-tabs button{height:36px;padding:0 14px;border:1px solid transparent;border-radius:9px;display:flex;align-items:center;gap:7px;font-size:9.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:transform .18s,box-shadow .18s,color .18s,background .18s,border-color .18s}
+.review-view-tabs button:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(28,45,64,.12)}
+.review-view-tabs button:focus-visible{outline:3px solid rgba(57,121,176,.22);outline-offset:2px}
+.review-view-tabs .pending-tab{color:#956315;border-color:#efd59e;background:#fff8e9}
+.review-view-tabs .approved-tab{color:#13765c;border-color:#bfe3d4;background:#effaf6}
+.review-view-tabs .rejected-tab{color:#ae4d48;border-color:#efc8c5;background:#fff3f2}
+.review-view-tabs .pending-tab.active{color:#fff;border-color:#b97a16;background:linear-gradient(135deg,#b97a16,#d99b31);box-shadow:0 7px 16px rgba(185,122,22,.25)}
+.review-view-tabs .approved-tab.active{color:#fff;border-color:#178164;background:linear-gradient(135deg,#16795e,#25a17c);box-shadow:0 7px 16px rgba(22,121,94,.24)}
+.review-view-tabs .rejected-tab.active{color:#fff;border-color:#b8504b;background:linear-gradient(135deg,#ad4945,#d46861);box-shadow:0 7px 16px rgba(173,73,69,.24)}
 .reviewer{color:#445469;font-size:9.5px;font-weight:750}
 .review-date{display:flex;flex-direction:column;gap:2px}
 .review-date strong{color:#445469;font-size:9.5px}
 .review-date span{color:#8d99a8;font-size:8.5px}
 :host-context(html[data-theme='dark']) .review-view-tabs{border-color:#2b4055;background:rgba(16,29,45,.88)}
-:host-context(html[data-theme='dark']) .review-view-tabs button{color:#9eafc1}
-:host-context(html[data-theme='dark']) .review-view-tabs button:hover{color:#d8e7e5;background:#183234}
+:host-context(html[data-theme='dark']) .review-view-tabs .pending-tab{color:#efc16e;border-color:#654d24;background:#2b261c}
+:host-context(html[data-theme='dark']) .review-view-tabs .approved-tab{color:#73cbb0;border-color:#285f50;background:#183029}
+:host-context(html[data-theme='dark']) .review-view-tabs .rejected-tab{color:#ef918a;border-color:#673b3d;background:#332226}
 :host-context(html[data-theme='dark']) .reviewer,:host-context(html[data-theme='dark']) .review-date strong{color:#cfdae6}
 :host-context(html[data-theme='dark']) .review-date span{color:#8fa0b2}
 table{min-width:1720px}

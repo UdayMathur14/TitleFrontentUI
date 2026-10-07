@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { UserIdentityService } from '../../core/services/user-identity.service';
 import {
   DeletePublicationResponse,
   ModifiedPublicationFilter,
@@ -17,6 +18,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class PublicationApiService {
   private readonly http = inject(HttpClient);
+  private readonly identity = inject(UserIdentityService);
   private readonly base = `${environment.apiUrl}/publication-titles`;
 
   search(filter: PublicationFilter): Observable<PagedPublicationResult<PublicationRecord>> {
@@ -44,7 +46,10 @@ export class PublicationApiService {
   }
 
   commitImport(importToken: string): Observable<SavePublicationResponse> {
-    return this.http.post<SavePublicationResponse>(`${this.base}/import/commit`, { importToken });
+    return this.http.post<SavePublicationResponse>(`${this.base}/import/commit`, {
+      importToken,
+      createdBy: this.identity.requireUserName()
+    });
   }
 
   template(): Observable<Blob> {
@@ -58,6 +63,7 @@ export class PublicationApiService {
   uploadModified(file: File): Observable<SavePublicationResponse> {
     const form = new FormData();
     form.append('file', file);
+    form.append('updatedBy', this.identity.requireUserName());
     return this.http.post<SavePublicationResponse>(`${this.base}/modified/import`, form);
   }
 

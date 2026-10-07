@@ -9,7 +9,7 @@
     <nav class="side-nav">
       <p class="nav-label"></p>
 
-      @if (canAccessInvoiceMenu()) {
+      @if (canAccessInvoiceMenu() || canAccess(menuPermissions.invoice.multipleInvoice)) {
       <section class="nav-group normal-title-group" aria-label="Normal titles">
         <div class="nav-group-title">
           <span><lucide-icon [img]="icons.BookOpen" [size]="16" /></span>
@@ -20,6 +20,8 @@
         }
         @if (canAccess(menuPermissions.invoice.viewTitles)) {
           <a routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.BookOpen" [size]="17" /><span>View Titles Invoice</span></a>
+        }
+        @if (canAccess(menuPermissions.invoice.multipleInvoice)) {
           <a routerLink="/titles/multiple-invoice" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}"><lucide-icon [img]="icons.ListChecks" [size]="17" /><span>Multiple Title Invoice</span></a>
         }
         @if (canAccess(menuPermissions.invoice.uploadTitles)) {

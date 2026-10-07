@@ -22,7 +22,7 @@ import {
   X,
   XCircle
 } from 'lucide-angular';
-import { TEMPORARILY_BYPASS_UI_PERMISSIONS, TITLE_MENU_PERMISSIONS } from '../../core/auth/title-menu-permissions';
+import { TITLE_MENU_PERMISSIONS } from '../../core/auth/title-menu-permissions';
 import { PermissionService } from '../../core/services/permission.service';
 import { apiErrorMessage } from '../../shared/api-error';
 import { MultipleTitleInvoiceApiService } from './multiple-title-invoice-api.service';
@@ -65,7 +65,6 @@ export class MultipleTitleInvoiceComponent implements OnInit {
   readonly viewMode = signal<ReviewView>('PendingApproval');
 
   readonly canReview = computed(() =>
-    TEMPORARILY_BYPASS_UI_PERMISSIONS ||
     this.permissions.hasAny(TITLE_MENU_PERMISSIONS.invoice.editTitles)
   );
   readonly pendingRecords = computed(() => this.records().filter(record => this.isPending(record)));
@@ -163,7 +162,7 @@ export class MultipleTitleInvoiceComponent implements OnInit {
     if (!this.showReviewControls() || !decision || !ids.length || this.processing()) return;
 
     this.processing.set(true);
-    this.api.decide({ ids, decision, reviewedBy: this.reviewerName() }).subscribe({
+    this.api.decide({ ids, decision }).subscribe({
       next: result => {
         this.processing.set(false);
         this.decision.set(null);
@@ -213,29 +212,6 @@ export class MultipleTitleInvoiceComponent implements OnInit {
   notify(message: string) {
     this.toast.set(message);
     setTimeout(() => this.toast.set(''), 3000);
-  }
-
-  private reviewerName(): string {
-    const storedName = localStorage.getItem('userName')?.trim();
-    if (storedName) return storedName;
-
-    try {
-      const profile = JSON.parse(localStorage.getItem('profile') ?? '{}') as Record<string, unknown>;
-      const name = profile['userName'] ?? profile['UserName'] ?? profile['name'];
-      if (typeof name === 'string' && name.trim()) return name.trim();
-
-      const token = String(profile['accessToken'] ?? profile['token'] ?? localStorage.getItem('umsToken') ?? '');
-      const payloadPart = token.split('.')[1];
-      if (payloadPart) {
-        const payload = JSON.parse(atob(payloadPart.replace(/-/g, '+').replace(/_/g, '/'))) as Record<string, unknown>;
-        const claim = payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
-          ?? payload['name'] ?? payload['unique_name'] ?? payload['sub'];
-        if (typeof claim === 'string' && claim.trim()) return claim.trim();
-      }
-      return 'Unknown reviewer';
-    } catch {
-      return 'Unknown reviewer';
-    }
   }
 
   private emptyFilter(status: ReviewView): MultipleTitleInvoiceFilter {

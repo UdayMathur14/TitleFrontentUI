@@ -10,6 +10,7 @@ export interface PublicationRecord {
   paperId: string;
   title: string;
   updatedTitle: string;
+  updatedTitleBy?: string | null;
   createdBy: string;
   titleYear: string;
   createdOn: string | null;

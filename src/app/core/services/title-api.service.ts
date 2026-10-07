@@ -14,10 +14,12 @@ import {
   TitleRecord,
   UpdateTitleRequest
 } from '../models/title.models';
+import { UserIdentityService } from './user-identity.service';
 
 @Injectable({ providedIn: 'root' })
 export class TitleApiService {
   private readonly http = inject(HttpClient);
+  private readonly identity = inject(UserIdentityService);
   private readonly base = `${environment.apiUrl}/titles`;
 
   search(filter: TitleFilter): Observable<PagedResult<TitleRecord>> {
@@ -29,11 +31,17 @@ export class TitleApiService {
   }
 
   create(request: CreateTitleRequest): Observable<TitleRecord> {
-    return this.http.post<TitleRecord>(this.base, request);
+    return this.http.post<TitleRecord>(this.base, {
+      ...request,
+      createdBy: this.identity.requireUserName()
+    });
   }
 
   update(id: number, request: UpdateTitleRequest): Observable<TitleRecord> {
-    return this.http.put<TitleRecord>(`${this.base}/${id}`, request);
+    return this.http.put<TitleRecord>(`${this.base}/${id}`, {
+      ...request,
+      createdBy: this.identity.requireUserName()
+    });
   }
 
   deleteOne(id: number): Observable<DeleteTitlesResponse> {
@@ -61,7 +69,10 @@ export class TitleApiService {
   }
 
   commitImport(importToken: string): Observable<CommitImportResponse> {
-    return this.http.post<CommitImportResponse>(`${this.base}/import/commit`, { importToken });
+    return this.http.post<CommitImportResponse>(`${this.base}/import/commit`, {
+      importToken,
+      createdBy: this.identity.requireUserName()
+    });
   }
 
   template(): Observable<Blob> {

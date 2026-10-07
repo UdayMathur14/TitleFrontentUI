@@ -18,9 +18,9 @@
 </section>
 
 <nav class="review-view-tabs" aria-label="Multiple title invoice views">
-  <button [class.active]="viewMode() === 'PendingApproval'" (click)="switchView('PendingApproval')"><lucide-icon [img]="icons.CircleAlert" [size]="15" /><span>Pending review</span></button>
-  <button [class.active]="viewMode() === 'Approved'" (click)="switchView('Approved')"><lucide-icon [img]="icons.CheckCheck" [size]="15" /><span>Approved history</span></button>
-  <button [class.active]="viewMode() === 'Rejected'" (click)="switchView('Rejected')"><lucide-icon [img]="icons.XCircle" [size]="15" /><span>Rejected history</span></button>
+  <button class="pending-tab" title="View titles awaiting a decision" [class.active]="viewMode() === 'PendingApproval'" (click)="switchView('PendingApproval')"><lucide-icon [img]="icons.CircleAlert" [size]="15" /><span>Pending review</span></button>
+  <button class="approved-tab" title="View approved title history" [class.active]="viewMode() === 'Approved'" (click)="switchView('Approved')"><lucide-icon [img]="icons.CheckCheck" [size]="15" /><span>Approved history</span></button>
+  <button class="rejected-tab" title="View rejected title history" [class.active]="viewMode() === 'Rejected'" (click)="switchView('Rejected')"><lucide-icon [img]="icons.XCircle" [size]="15" /><span>Rejected history</span></button>
 </nav>
 
 <section class="review-card card">

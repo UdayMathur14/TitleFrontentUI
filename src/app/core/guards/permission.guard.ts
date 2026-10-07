@@ -18,4 +18,3 @@ export const permissionGuard: CanActivateFn = (route, state) => {
 
   return router.parseUrl('/access-denied');
 };
-

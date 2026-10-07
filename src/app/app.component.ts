@@ -5,6 +5,7 @@ import { BarChart3, Bell, BookCopy, BookOpen, ChevronLeft, ChevronsLeft, FilePen
 import { GlobalLoaderService } from './core/services/global-loader.service';
 import { PermissionService } from './core/services/permission.service';
 import { TITLE_MENU_PERMISSIONS } from './core/auth/title-menu-permissions';
+import { UserIdentityService } from './core/services/user-identity.service';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,7 @@ import { TITLE_MENU_PERMISSIONS } from './core/auth/title-menu-permissions';
 export class AppComponent {
   private readonly router = inject(Router);
   private readonly permissionService = inject(PermissionService);
+  private readonly identity = inject(UserIdentityService);
   readonly loader = inject(GlobalLoaderService);
   readonly menuPermissions = TITLE_MENU_PERMISSIONS;
   readonly icons = { BarChart3, Bell, BookCopy, BookOpen, ChevronLeft, ChevronsLeft, FilePenLine, FileSpreadsheet, LayoutDashboard, ListChecks, LogOut, Menu, Moon, Plus, Search, Settings2, Sparkles, Sun };
@@ -37,16 +39,11 @@ export class AppComponent {
     this.applyTheme(this.darkMode());
   }
   logout() {
-    localStorage.removeItem('profile');
-    localStorage.removeItem('permissions');
-    localStorage.removeItem('umsToken');
-    localStorage.removeItem('umsAppId');
-    localStorage.removeItem('userName');
-    sessionStorage.removeItem('profile');
-    sessionStorage.removeItem('permissions');
-    window.location.replace('http://192.168.29.101:90');
+    this.identity.logout();
   }
-  canAccess(permissions: readonly string[]) { return this.permissionService.hasAny(permissions); }
+  canAccess(permissions: readonly string[]) {
+    return this.permissionService.hasAny(permissions);
+  }
   canAccessInvoiceMenu() {
     return this.canAccess(this.menuPermissions.invoice.group);
   }

@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { UserIdentityService } from '../../core/services/user-identity.service';
 import {
   MultipleInvoiceDecisionRequest,
   MultipleInvoiceDecisionResponse,
@@ -12,6 +13,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class MultipleTitleInvoiceApiService {
   private readonly http = inject(HttpClient);
+  private readonly identity = inject(UserIdentityService);
 
   // This workflow belongs only to regular Titles. Publication APIs remain isolated.
   private readonly base = `${environment.apiUrl}/titles/multiple-invoices`;
@@ -30,6 +32,9 @@ export class MultipleTitleInvoiceApiService {
   }
 
   decide(request: MultipleInvoiceDecisionRequest): Observable<MultipleInvoiceDecisionResponse> {
-    return this.http.patch<MultipleInvoiceDecisionResponse>(`${this.base}/review`, request);
+    return this.http.patch<MultipleInvoiceDecisionResponse>(`${this.base}/review`, {
+      ...request,
+      reviewedBy: this.identity.requireUserName()
+    });
   }
 }

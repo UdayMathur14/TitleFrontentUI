@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PermissionService } from './permission.service';
+import { UserIdentityService } from './user-identity.service';
 
 interface UmsProfile extends Record<string, unknown> {
   accessToken?: string;
@@ -15,6 +16,7 @@ interface UmsProfile extends Record<string, unknown> {
 export class AuthSessionService {
   private readonly http = inject(HttpClient);
   private readonly permissionService = inject(PermissionService);
+  private readonly identity = inject(UserIdentityService);
 
   /**
    * Runs before Angular renders the first route. UMS opens this application with
@@ -35,6 +37,7 @@ export class AuthSessionService {
 
     if (!umsToken || !appId) {
       this.permissionService.refresh();
+      this.identity.ensureUserNameOrLogout();
       return;
     }
 
@@ -49,10 +52,12 @@ export class AuthSessionService {
       localStorage.setItem('profile', JSON.stringify(profile));
       localStorage.setItem('userName', profile.userName ?? '');
       this.permissionService.refresh();
+      this.identity.ensureUserNameOrLogout();
     } catch (error) {
       // Keep an existing application session usable during a temporary UMS
       // outage. The Title API still validates that JWT and its expiry itself.
       this.permissionService.refresh();
+      this.identity.ensureUserNameOrLogout();
       console.error('Unable to refresh UMS permissions.', error);
     }
   }
@@ -77,4 +82,3 @@ export class AuthSessionService {
     return typeof value === 'string' ? value : '';
   }
 }
-

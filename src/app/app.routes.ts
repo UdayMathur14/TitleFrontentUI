@@ -15,7 +15,7 @@ export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   { path: 'dashboard', component: DashboardComponent, canActivate: [permissionGuard], data: { permissions: TITLE_MENU_PERMISSIONS.invoice.overview }, title: 'Normal Titles Overview · TitleFlow' },
   { path: 'titles', component: TitleListComponent, canActivate: [permissionGuard], data: { permissions: TITLE_MENU_PERMISSIONS.invoice.viewTitles }, title: 'Title Library · TitleFlow' },
-  { path: 'titles/multiple-invoice', component: MultipleTitleInvoiceComponent, canActivate: [permissionGuard], data: { permissions: TITLE_MENU_PERMISSIONS.invoice.viewTitles }, title: 'Multiple Title Invoice · TitleFlow' },
+  { path: 'titles/multiple-invoice', component: MultipleTitleInvoiceComponent, canActivate: [permissionGuard], data: { permissions: TITLE_MENU_PERMISSIONS.invoice.multipleInvoice }, title: 'Multiple Title Invoice · TitleFlow' },
   { path: 'titles/upload', component: TitleUploadComponent, canActivate: [permissionGuard], data: { permissions: TITLE_MENU_PERMISSIONS.invoice.uploadTitles }, title: 'Upload Titles · TitleFlow' },
   { path: 'publications/overview', component: PublicationOverviewComponent, canActivate: [permissionGuard], data: { permissions: TITLE_MENU_PERMISSIONS.publication.overview }, title: 'Publication Overview · TitleFlow' },
   { path: 'publications', component: PublicationImportComponent, canActivate: [permissionGuard], data: { permissions: TITLE_MENU_PERMISSIONS.publication.validateAndUpload }, title: 'Publication Title Validation · TitleFlow' },
